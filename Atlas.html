@@ -1,0 +1,821 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Atlas</title>
+<style>
+/* ── Reset ── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Nunito Sans',sans-serif;font-size:14px;color:#1a1a1a}
+
+/* ── Tokens (subset) ── */
+:root{
+  --blue-600:#0265dc;--blue-700:#1d4ca3;--blue-50:#e6f1ff;--blue-100:#cce3ff;
+  --neutral-0:#fff;--neutral-50:#eeeeee;--neutral-100:#dfdfdf;--neutral-200:#c4c4c4;
+  --neutral-500:#707070;--neutral-700:#404040;--neutral-900:#1a1a1a;
+  --green-600:#077e50;--green-50:#d3fded;
+  --yellow-50:#fffcf0;--yellow-500:#ffbe00;
+  --red-600:#d62100;--red-50:#ffe9e5;
+  --radius-lg:12px;--radius-md:8px;--radius-sm:6px;
+  --shadow-lg:0 8px 32px rgba(0,0,0,.14),0 2px 8px rgba(0,0,0,.08);
+  --shadow-md:0 4px 16px rgba(0,0,0,.10),0 1px 4px rgba(0,0,0,.06);
+  --atw-w:400px;--atw-h:600px;--atw-left-w:100%;
+}
+
+/* ══════════════════════════════════════════
+   EMBED MODE — transparent overlay
+══════════════════════════════════════════ */
+html.atlas-embed,body.atlas-embed{background:transparent!important;overflow:hidden}
+body.atlas-embed #stage .topnav,
+body.atlas-embed #stage .work{display:none}
+
+/* ══════════════════════════════════════════
+   MOCK BACKDROP (non-embed)
+══════════════════════════════════════════ */
+.topnav{display:flex;align-items:center;gap:12px;height:56px;padding:0 24px;
+  background:#fff;border-bottom:1px solid var(--neutral-100);position:sticky;top:0;z-index:10}
+.tn-logo{font-weight:700;font-size:15px;color:var(--blue-600);margin-right:8px}
+.tn-search{flex:1;max-width:400px;height:36px;border:1px solid var(--neutral-200);border-radius:20px;
+  padding:0 14px;display:flex;align-items:center;gap:8px;color:var(--neutral-500);cursor:pointer;background:#fafafa;font-size:13px}
+.tn-right{margin-left:auto;display:flex;align-items:center;gap:4px}
+.tn-icon{width:36px;height:36px;display:inline-flex;align-items:center;justify-content:center;
+  border:none;background:none;border-radius:8px;cursor:pointer;color:var(--neutral-700)}
+.tn-icon:hover{background:var(--neutral-50)}
+.tn-icon .ic{width:20px;height:20px}
+.hex-wrap{position:relative;display:inline-flex;align-items:center}
+.ns-tag{display:none}
+
+.work{max-width:900px;margin:0 auto;padding:32px 24px}
+.work-h1{font-size:22px;font-weight:700;margin-bottom:6px}
+.work-sub{color:var(--neutral-500);font-size:14px;margin-bottom:20px}
+.work-actions{display:flex;gap:10px;margin-bottom:24px}
+.faux{border:1px solid var(--neutral-100);border-radius:var(--radius-lg);overflow:hidden}
+.faux-row{display:grid;grid-template-columns:2fr 1.4fr 1.2fr .7fr .9fr;gap:0;padding:12px 16px;
+  border-bottom:1px solid var(--neutral-100);align-items:center;font-size:13px}
+.faux-row:last-child{border-bottom:none}
+.faux-row.h{background:var(--neutral-50);font-weight:700;font-size:12px;color:var(--neutral-500);text-transform:uppercase;letter-spacing:.4px}
+.faux-nm{font-weight:600;font-size:13px;color:var(--neutral-900)}
+.faux-sub{font-size:12px;color:var(--neutral-500);margin-top:2px}
+.faux-cell{color:var(--neutral-700)}
+.faux-cell.up{color:#d62100;font-weight:700}
+.faux-chip{display:inline-flex;padding:3px 10px;border-radius:20px;font-size:12px;
+  background:var(--yellow-50);color:#8a6300;border:1px solid var(--yellow-500)}
+
+/* ══════════════════════════════════════════
+   HEX MARK + HEX BUTTON
+══════════════════════════════════════════ */
+.hex-mark{width:24px;height:24px;flex-shrink:0}
+.hex-btn{position:relative;width:36px;height:36px;display:inline-flex;align-items:center;justify-content:center;
+  border:none;background:none;border-radius:8px;cursor:pointer;padding:0}
+.hex-btn:hover{background:var(--neutral-50)}
+.hex-btn .hex-mark{width:26px;height:26px}
+.hex-badge{position:absolute;top:2px;right:2px;min-width:16px;height:16px;border-radius:8px;
+  background:#d62100;color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;
+  justify-content:center;padding:0 4px;line-height:1;border:2px solid #fff}
+.hex-badge.hidden{display:none}
+
+/* ASK ATLAS button */
+.btn-atlas{display:inline-flex;align-items:center;gap:7px;height:36px;padding:0 16px;
+  border:none;border-radius:var(--radius-md);cursor:pointer;font-size:13px;font-weight:700;
+  font-family:inherit;
+  background:linear-gradient(135deg,#1a4fb8 0%,#2f6cdb 45%,#55aae7 100%);
+  color:#fff;box-shadow:0 2px 6px rgba(31,111,219,.30)}
+.btn-atlas:hover{filter:brightness(1.08)}
+.btn-atlas .hex-mark{width:18px;height:18px}
+
+/* ══════════════════════════════════════════
+   ATLAS WINDOW (atw)
+══════════════════════════════════════════ */
+.atw{
+  position:fixed;bottom:20px;right:20px;
+  width:var(--atw-w);height:var(--atw-h);
+  border-radius:var(--radius-lg);
+  background:#fff;
+  box-shadow:var(--shadow-lg);
+  display:flex;flex-direction:column;
+  overflow:hidden;
+  z-index:9100;
+  transition:width .25s,height .25s,bottom .25s,right .25s,border-radius .25s;
+}
+.atw.hidden{display:none}
+
+/* FULL mode */
+.atw.atw--full{
+  bottom:0;right:0;
+  width:100vw;height:100vh;
+  border-radius:0;
+}
+
+/* ── Header ── */
+.atw-head{
+  flex:none;display:flex;align-items:center;justify-content:space-between;
+  padding:0 12px 0 14px;height:52px;
+  border-bottom:1px solid var(--neutral-100);background:#fff;
+  border-radius:var(--radius-lg) var(--radius-lg) 0 0;
+}
+.atw--full .atw-head{border-radius:0}
+.atw-title-wrap{display:flex;align-items:center;gap:7px;font-weight:700;font-size:15px}
+.atw-titlebadge{min-width:18px;height:18px;border-radius:9px;background:#d62100;color:#fff;
+  font-size:10px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;padding:0 5px}
+.atw-titlebadge.hidden{display:none}
+.atw-hicons{display:flex;align-items:center;gap:2px}
+.ic-btn{width:32px;height:32px;display:inline-flex;align-items:center;justify-content:center;
+  border:none;background:none;border-radius:6px;cursor:pointer;color:var(--neutral-700)}
+.ic-btn:hover{background:var(--neutral-50)}
+.ic-btn .ic{width:18px;height:18px}
+
+/* ── Body ── */
+.atw-body{
+  flex:1;display:flex;overflow:hidden;min-height:0;
+}
+
+/* ── Left pane (chat area) ── */
+.atw-left{
+  flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden;
+}
+.atw--full .atw-left{
+  flex:0 0 var(--atw-left-w);width:var(--atw-left-w);max-width:680px;
+}
+
+/* ── Resizer ── */
+.atw-resizer{
+  flex:none;width:5px;background:transparent;cursor:col-resize;
+  border-left:1px solid var(--neutral-100);transition:background .15s;
+  display:none;
+}
+.atw--full.view-convo .atw-resizer{display:block}
+.atw-resizer:hover,.atw-resizer.dragging{background:var(--blue-100)}
+
+/* ── Right pane (detail panel) ── */
+.atw-right{
+  flex:1;overflow-y:auto;padding:16px;border-left:1px solid var(--neutral-100);
+  display:none;
+}
+.atw--full.view-convo .atw-right{display:block}
+
+/* ── View panes ── */
+.view-pane{flex:1;display:flex;flex-direction:column;overflow:hidden;min-height:0}
+
+/* ALL CHATS */
+#viewChats{padding:8px 0}
+.newchat-btn{display:flex;align-items:center;gap:6px;margin:4px 12px 8px;padding:0 14px;
+  height:36px;border:1px solid var(--neutral-200);background:#fff;border-radius:var(--radius-md);
+  cursor:pointer;font-size:13px;font-weight:600;font-family:inherit;color:var(--neutral-900)}
+.newchat-btn:hover{background:var(--neutral-50)}
+.newchat-btn .ic{width:16px;height:16px}
+.chats-list{flex:1;overflow-y:auto;padding:0 8px}
+.chat-card{width:100%;text-align:left;background:none;border:none;border-radius:var(--radius-md);
+  padding:10px 12px;cursor:pointer;font-family:inherit}
+.chat-card:hover{background:var(--neutral-50)}
+.chat-card.unread{background:var(--blue-50)}
+.chat-card.unread:hover{background:#dceeff}
+.cgc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:3px}
+.cgc-title{font-weight:600;font-size:13px;color:var(--neutral-900);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px}
+.cgc-meta{display:flex;align-items:center;gap:5px;flex-shrink:0}
+.cgc-time{font-size:11px;color:var(--neutral-500)}
+.cgc-dot{width:8px;height:8px;border-radius:50%;background:var(--blue-600);flex-shrink:0}
+.cgc-prev{font-size:12px;color:var(--neutral-500);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* WELCOME */
+#viewWelcome{padding:24px 20px;overflow-y:auto}
+.welcome{display:flex;flex-direction:column;align-items:center;text-align:center;padding-top:24px}
+.welcome-hex .hex-mark{width:48px;height:48px;margin-bottom:14px}
+.welcome-h{font-size:18px;font-weight:700;margin-bottom:6px}
+.welcome-sub{font-size:13px;color:var(--neutral-500);margin-bottom:20px;line-height:1.5}
+.welcome-sugg{display:flex;flex-direction:column;gap:8px;width:100%}
+.welcome-chip{display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:10px 14px;border:1px solid var(--neutral-200);border-radius:var(--radius-md);
+  background:#fff;cursor:pointer;font-family:inherit;font-size:13px;text-align:left;
+  color:var(--neutral-900)}
+.welcome-chip:hover{background:var(--neutral-50);border-color:var(--blue-600)}
+.welcome-chip .ic{width:16px;height:16px;flex-shrink:0;color:var(--neutral-500)}
+
+/* CONVERSATION */
+#viewConvo{display:flex;flex-direction:column;min-height:0}
+.progress-bar{flex:none;margin:8px 12px 0;padding:8px 12px;border-radius:var(--radius-md);
+  background:var(--blue-50);border:1px solid var(--blue-100);font-size:12px}
+.progress-bar.hidden{display:none}
+.progress-bar.apg-complete{background:var(--green-50);border-color:#b8f5dd}
+.apg-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.apg-track{height:4px;border-radius:2px;background:var(--neutral-100);overflow:hidden}
+.apg-fill{height:100%;background:var(--blue-600);border-radius:2px;transition:width .4s}
+.apg-complete .apg-fill{background:var(--green-600)}
+.chat{flex:1;overflow-y:auto;padding:12px 12px 4px;display:flex;flex-direction:column;gap:10px;min-height:0}
+.chips{flex:none;display:flex;flex-wrap:wrap;gap:6px;padding:6px 12px 0}
+.chip{padding:6px 12px;border:1px solid var(--neutral-200);border-radius:20px;background:#fff;
+  cursor:pointer;font-size:12px;font-weight:600;font-family:inherit;color:var(--neutral-900);white-space:nowrap}
+.chip:hover{background:var(--blue-50);border-color:var(--blue-600);color:var(--blue-600)}
+.chip.pending{background:var(--yellow-50);border:1px solid var(--yellow-500);color:#8a6300}
+.chip.approved{background:var(--green-600);color:#fff;border-color:var(--green-600)}
+.chip.applied{background:var(--blue-600);color:#fff;border-color:var(--blue-600)}
+.chip.rejected{background:var(--red-600);color:#fff;border-color:var(--red-600)}
+
+/* ── Messages ── */
+.m-user{align-self:flex-end;max-width:80%;background:var(--blue-600);color:#fff;
+  border-radius:16px 16px 4px 16px;padding:9px 14px;font-size:13px;line-height:1.45;word-break:break-word}
+.m-atlas{align-self:flex-start;max-width:92%;font-size:13px;line-height:1.5}
+.atlas-label{display:flex;align-items:center;gap:5px;margin-bottom:4px;font-size:11px;font-weight:700;
+  color:var(--neutral-500);text-transform:uppercase;letter-spacing:.4px}
+.atlas-label .hex-mark{width:16px;height:16px}
+.m-txt{background:var(--neutral-50);border:1px solid var(--neutral-100);border-radius:4px 16px 16px 16px;
+  padding:9px 13px;color:var(--neutral-900);margin-bottom:4px;word-break:break-word}
+.m-txt:last-child{margin-bottom:0}
+.m-txt b{font-weight:700}
+.m-txt ul{padding-left:18px;margin:6px 0}
+.m-txt li{margin-bottom:3px}
+
+/* Typing indicator */
+.m-typing{display:flex;align-items:center;gap:4px;padding:12px 16px;background:var(--neutral-50);
+  border:1px solid var(--neutral-100);border-radius:4px 16px 16px 16px;width:60px}
+.m-typing i{width:6px;height:6px;border-radius:50%;background:var(--neutral-500);display:block;
+  animation:bounce .9s ease-in-out infinite}
+.m-typing i:nth-child(2){animation-delay:.15s}
+.m-typing i:nth-child(3){animation-delay:.3s}
+@keyframes bounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-5px)}}
+
+/* Cost update cards inside chat */
+.cost-card{background:#fff;border:1px solid var(--neutral-100);border-radius:var(--radius-md);
+  padding:12px 14px;margin-bottom:6px;font-size:13px}
+.cost-card:last-child{margin-bottom:0}
+.cost-card-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px}
+.cost-card-name{font-weight:600;color:var(--neutral-900);line-height:1.3}
+.cost-card-sku{font-size:11px;color:var(--neutral-500);margin-top:2px}
+.cost-card-pct{font-size:13px;font-weight:700;color:#d62100}
+.cost-card-prices{font-size:12px;color:var(--neutral-500);margin-bottom:8px}
+.cost-card-prices b{color:var(--neutral-900)}
+.cost-card-actions{display:flex;gap:6px}
+.cca-btn{flex:1;height:30px;border-radius:6px;border:1px solid var(--neutral-200);
+  background:#fff;cursor:pointer;font-size:12px;font-weight:600;font-family:inherit;color:var(--neutral-700)}
+.cca-btn:hover{background:var(--neutral-50)}
+.cca-btn.approve{background:var(--green-600);color:#fff;border-color:var(--green-600)}
+.cca-btn.approve:hover{background:#05613e}
+.cca-btn.reject{background:var(--red-50);color:var(--red-600);border-color:var(--red-600)}
+.cca-btn.reject:hover{background:#ffc0bb}
+.cca-btn.done{opacity:.5;cursor:default;pointer-events:none}
+
+/* Detail panel cards */
+.panel-h{font-size:14px;font-weight:700;margin-bottom:12px;color:var(--neutral-900)}
+.panel-card{background:#fff;border:1px solid var(--neutral-100);border-radius:var(--radius-md);
+  padding:12px 14px;margin-bottom:10px;font-size:13px}
+.panel-card-label{font-size:11px;font-weight:700;color:var(--neutral-500);text-transform:uppercase;
+  letter-spacing:.4px;margin-bottom:4px}
+.panel-card-val{font-weight:700;font-size:16px;color:var(--neutral-900)}
+.panel-card-sub{font-size:12px;color:var(--neutral-500);margin-top:2px}
+.panel-stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+
+/* ── Input ── */
+.atw-foot{flex:none;border-top:1px solid var(--neutral-100);padding:10px 12px 8px}
+.foot-input{display:flex;align-items:center;gap:6px;border:1px solid var(--neutral-200);
+  border-radius:20px;padding:0 6px 0 14px;background:#fafafa;transition:border-color .15s}
+.foot-input:focus-within{border-color:var(--blue-600);background:#fff}
+.foot-input input{flex:1;border:none;background:none;font-family:inherit;font-size:13px;
+  height:36px;outline:none;color:var(--neutral-900)}
+.foot-input input::placeholder{color:var(--neutral-500)}
+.foot-send{width:30px;height:30px;display:inline-flex;align-items:center;justify-content:center;
+  border:none;background:none;border-radius:50%;cursor:pointer;color:var(--neutral-500);flex-shrink:0}
+.foot-send:hover{background:var(--neutral-50);color:var(--blue-600)}
+.foot-send .ic{width:16px;height:16px}
+.foot-disc{font-size:10px;color:var(--neutral-500);text-align:center;margin-top:5px;line-height:1.4}
+
+/* SVG icon helper */
+.ic{display:inline-block;vertical-align:middle;width:20px;height:20px;flex-shrink:0}
+</style>
+</head>
+<body class="anvil2 theme-core mode-light">
+<div class="stage" id="stage"></div>
+<script>
+/* ============================================================
+   Atlas engine + flow — self-contained
+   ============================================================ */
+const HEX = `<svg class="hex-mark" viewBox="0 0 24 24" aria-hidden="true">
+  <defs><linearGradient id="atlasHex" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#2f6cdb"/><stop offset="1" stop-color="#55aae7"/></linearGradient></defs>
+  <path d="M12 0.7 L22.4 6.4 L22.4 17.6 L12 23.3 L1.6 17.6 L1.6 6.4 Z" fill="url(#atlasHex)"/>
+  <path d="M12 6.4 L13.5 10.5 L17.6 12 L13.5 13.5 L12 17.6 L10.5 13.5 L6.4 12 L10.5 10.5 Z" fill="#fff" opacity="0.92"/>
+</svg>`;
+
+const ICONS = {
+  search:'<circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>',
+  bell:'<path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>',
+  help:'<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>',
+  grid:'<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/>',
+  expand:'<polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/>',
+  collapse:'<polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="14" y1="10" x2="21" y2="3"/><line x1="3" y1="21" x2="10" y2="14"/>',
+  newchat:'<path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5"/><line x1="18" y1="3" x2="18" y2="9"/><line x1="15" y1="6" x2="21" y2="6"/>',
+  close:'<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',
+  send:'<line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>',
+  check:'<polyline points="20 6 9 17 4 12"/>',
+  expand:'<polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/>',
+  collapse:'<polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="14" y1="10" x2="21" y2="3"/><line x1="3" y1="21" x2="10" y2="14"/>',
+  mic:'<rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/>',
+  chats:'<rect x="3" y="4" width="18" height="14" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="8" y1="13" x2="15" y2="13"/>',
+  chevron:'<polyline points="9 18 15 12 9 6"/>',
+  up:'<polyline points="18 15 12 9 6 15"/>',
+  swap:'<polyline points="16 3 21 3 21 8"/><line x1="21" y1="3" x2="14" y2="10"/><polyline points="8 21 3 21 3 16"/><line x1="3" y1="21" x2="10" y2="14"/>',
+};
+const ic = (n, cls='') => `<svg class="ic ${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[n]||''}</svg>`;
+
+/* ── State ── */
+const STATE = {
+  open: false,
+  mode: 'window',
+  view: 'convo',
+  started: false,
+  unread: 1,
+  pendingTotal: 12,
+  pending: 12,
+  approved: 0,
+  discontinued: 2,
+  swapped: false,
+};
+
+/* ── Chats inbox ── */
+const ALL_CHATS = [
+  { id:'costs', unread:true,  title:'Catalog updates · this week', time:'Just now',
+    preview:'12 cost updates need review — mostly HVAC supplier increases, plus 2 items flagged for discontinuation.' },
+  { id:'ytd',   unread:false, title:'Year-to-date expenses', time:'2d ago',
+    preview:'Here\'s your year-to-date spend across all trades, with the three biggest movers called out.' },
+  { id:'season',unread:false, title:'Spring campaign ideas', time:'5d ago',
+    preview:'Three seasonal promotions you could run, based on last year\'s booking patterns.' },
+];
+
+/* ── Backdrop HTML ── */
+function backdropHTML(){
+  const rows = [
+    ['R-410A Refrigerant 25lb','HVAC-REFR-002 · Refrigerants','National Refrigerants','$175.00','$245.00','+40.0%',6],
+    ['Scroll Compressor 3-Ton','HVAC-COMP-001 · Compressors','Carrier Parts Direct','$1,245.00','$1,389.50','+11.6%',4],
+    ['Heat Pump 3-Ton 18 SEER','HVAC-HP-021 · Heat Pumps','Carrier Parts Direct','$2,840.00','$3,120.00','+9.9%',6],
+    ['200A Main Breaker Panel','ELEC-PNL-005 · Panels','Eaton Wholesale','$389.00','$425.00','+9.3%',1],
+  ];
+  return `
+  <div class="topnav">
+    <span class="tn-logo">ServiceTitan</span>
+    <div class="tn-search">${ic('search')} Search PriceBook…</div>
+    <div class="tn-right">
+      <span class="hex-wrap">
+        <button class="hex-btn" id="hexBtn" aria-label="Open Atlas">${HEX}<span class="hex-badge hidden" id="hexBadge">0</span></button>
+      </span>
+      <button class="tn-icon" aria-label="Notifications">${ic('bell')}</button>
+      <button class="tn-icon" aria-label="Help">${ic('help')}</button>
+      <button class="tn-icon" aria-label="Apps">${ic('grid')}</button>
+    </div>
+  </div>
+  <div class="work">
+    <h1 class="work-h1">Updates &amp; Alerts</h1>
+    <p class="work-sub">Review the latest changes to items in your pricebook. <b id="pendingLbl">12 cost updates</b> need review.</p>
+    <div class="work-actions">
+      <button class="btn-atlas" id="explainBtn">${HEX} Ask Atlas</button>
+    </div>
+    <div class="faux">
+      <div class="faux-row h"><span>Item</span><span>Supplier</span><span>Cost change</span><span>% change</span><span>Status</span></div>
+      ${rows.map(r=>`<div class="faux-row">
+        <div><div class="faux-nm">${r[0]}</div><div class="faux-sub">${r[1]}</div></div>
+        <div class="faux-cell">${r[2]}</div>
+        <div class="faux-cell">${r[3]} → <b>${r[4]}</b></div>
+        <div class="faux-cell up">${r[5]}</div>
+        <div><span class="faux-chip">Pending review</span></div>
+      </div>`).join('')}
+    </div>
+  </div>
+  <div class="atw atw--window view-convo hidden" id="atw">
+    <div class="atw-head">
+      <div class="atw-title-wrap">${HEX}<span class="atw-title" id="atwTitle">Atlas</span><span class="atw-titlebadge hidden" id="atwTitleBadge">0</span></div>
+      <div class="atw-hicons">
+        <button class="ic-btn" id="viewChatsBtn" aria-label="View all chats" title="View all chats">${ic('chats')}</button>
+        <button class="ic-btn" id="newChatBtn" aria-label="New conversation" title="New conversation">${ic('newchat')}</button>
+        <button class="ic-btn" id="toggleSize" aria-label="Expand" title="Expand">${ic('expand')}</button>
+        <button class="ic-btn" id="closeAtw" aria-label="Close">${ic('close')}</button>
+      </div>
+    </div>
+    <div class="atw-body">
+      <div class="atw-left">
+        <div class="progress-bar hidden" id="atwProgress">
+          <div class="apg-row">
+            <span id="apgTxt">12 cost updates left to review</span>
+            <span id="apgDone" style="font-size:11px;color:#707070">0 done</span>
+          </div>
+          <div class="apg-track"><div class="apg-fill" id="apgFill" style="width:0%"></div></div>
+        </div>
+        <div class="view-pane" id="viewChats" style="display:none">
+          <button class="newchat-btn" id="newChatTop">${ic('newchat')} New chat</button>
+          <div class="chats-list" id="chatsList"></div>
+        </div>
+        <div class="view-pane" id="viewWelcome" style="display:none">
+          <div class="welcome">
+            <div class="welcome-hex">${HEX}</div>
+            <h3 class="welcome-h">Hello! I'm Atlas</h3>
+            <p class="welcome-sub">Ask a question or choose a suggestion to begin.</p>
+            <div class="welcome-sugg" id="welcomeSugg"></div>
+          </div>
+        </div>
+        <div class="view-pane" id="viewConvo" style="display:flex">
+          <div class="chat" id="chat"></div>
+          <div class="chips" id="chips"></div>
+        </div>
+        <div class="atw-foot">
+          <div class="foot-input">
+            <input id="atInput" placeholder="Ask Atlas" autocomplete="off">
+            <button class="foot-send" id="atMic" aria-label="Voice">${ic('mic')}</button>
+            <button class="foot-send" id="atSend" aria-label="Send">${ic('send')}</button>
+          </div>
+          <div class="foot-disc">Atlas is TI-powered, subject to our privacy policy. Learn more</div>
+        </div>
+      </div>
+      <div class="atw-resizer" id="atwResizer"></div>
+      <div class="atw-right" id="panel"></div>
+    </div>
+  </div>`;
+}
+
+/* ── Mount ── */
+const stage = document.getElementById('stage');
+stage.innerHTML = backdropHTML();
+const $ = id => document.getElementById(id);
+const chat = $('chat'), chipsEl = $('chips'), panelEl = $('panel');
+
+/* ── Badge ── */
+function unreadCount(){ return ALL_CHATS.filter(c=>c.unread).length; }
+function updateBadge(){
+  const n = unreadCount();
+  const hb = $('hexBadge'), tb = $('atwTitleBadge');
+  hb.textContent = n; hb.classList.toggle('hidden', n===0);
+  tb.textContent = n; tb.classList.toggle('hidden', n===0 || STATE.view!=='chats');
+}
+
+/* ── Open/close ── */
+function openAtlas(view='chats'){
+  STATE.open = true;
+  $('atw').classList.remove('hidden');
+  showView(view);
+}
+function closeAtlas(){
+  STATE.open = false;
+  $('atw').classList.add('hidden');
+  try{ parent.postMessage({type:'atlas-close'}, '*'); }catch(e){}
+}
+function toggleAtlas(){ STATE.open ? closeAtlas() : openAtlas('chats'); }
+
+function setMode(m){
+  STATE.mode = m;
+  const w = $('atw');
+  w.classList.toggle('atw--full', m==='full');
+  w.classList.toggle('atw--window', m==='window');
+  $('toggleSize').innerHTML = ic(m==='full'?'collapse':'expand');
+  $('toggleSize').title = m==='full'?'Restore':'Expand';
+  scrollChat();
+}
+
+/* ── View router ── */
+function showView(v){
+  STATE.view = v;
+  const titles = { chats:'All chats', welcome:'Atlas', convo: STATE.convoTitle||'Atlas' };
+  $('atwTitle').textContent = titles[v];
+  $('viewChatsBtn').style.display = v==='chats' ? 'none' : 'inline-flex';
+  $('viewChats').style.display   = v==='chats'   ? 'flex' : 'none';
+  $('viewWelcome').style.display = v==='welcome' ? 'flex' : 'none';
+  $('viewConvo').style.display   = v==='convo'   ? 'flex' : 'none';
+  if(v==='chats') renderChats();
+  if(v==='welcome') renderWelcome();
+  updateBadge();
+  if(v==='convo') scrollChat();
+}
+
+function scrollChat(){ requestAnimationFrame(()=>{ chat.scrollTop = chat.scrollHeight; }); }
+
+/* ── All Chats ── */
+function renderChats(){
+  $('chatsList').innerHTML = ALL_CHATS.map(c=>`
+    <button class="chat-card ${c.unread?'unread':''}" data-chat="${c.id}">
+      <div class="cgc-top">
+        <span class="cgc-title">${c.title}</span>
+        <span class="cgc-meta"><span class="cgc-time">${c.time}</span>${c.unread?'<span class="cgc-dot" aria-label="Unread"></span>':''}</span>
+      </div>
+      <div class="cgc-prev">${c.preview}</div>
+    </button>`).join('');
+  $('chatsList').querySelectorAll('[data-chat]').forEach(b=> b.onclick=()=>openChat(b.dataset.chat));
+}
+
+function openChat(id){
+  if(id==='costs'){ startConvo(); return; }
+  const c = ALL_CHATS.find(x=>x.id===id); if(c) c.unread=false;
+  STATE.convoTitle = c ? c.title : 'Atlas';
+  chat.innerHTML=''; chipsEl.innerHTML=''; panelEl.innerHTML='';
+  api.progress(null);
+  STATE.started=false;
+  showView('convo');
+  api.atlas(`<div class="m-txt">${c?c.preview:''}</div><div class="m-txt" style="color:#707070">This is a saved conversation — this prototype focuses on the catalog updates chat.</div>`, 360);
+  updateBadge();
+}
+
+/* ── Welcome ── */
+function renderWelcome(){
+  const sugg = [
+    { label:'Summarize this week\'s cost updates', on: startConvo },
+    { label:'Why did R-410A jump 40%?',            on: startConvo },
+    { label:'What\'s being discontinued?',          on: startConvo },
+  ];
+  const el = $('welcomeSugg'); el.innerHTML='';
+  sugg.forEach(s=>{ const b=document.createElement('button'); b.className='welcome-chip';
+    b.innerHTML=`<span>${s.label}</span>${ic('send')}`; b.onclick=s.on; el.appendChild(b); });
+}
+
+/* ── Start / resume cost-update convo ── */
+function startConvo(){
+  const costs = ALL_CHATS.find(c=>c.id==='costs'); if(costs) costs.unread=false;
+  STATE.convoTitle='Catalog updates · this week';
+  if(!STATE.started){
+    chat.innerHTML=''; chipsEl.innerHTML=''; panelEl.innerHTML='';
+    FLOW.start(api);
+    STATE.started=true;
+  }
+  showView('convo');
+}
+
+function newChat(){
+  STATE.started=false;
+  chat.innerHTML=''; chipsEl.innerHTML=''; panelEl.innerHTML='';
+  api.progress(null);
+  STATE.convoTitle='Atlas';
+  showView('welcome');
+}
+
+/* ── API for flow ── */
+const api = {
+  ic, HEX, state: STATE,
+  money(n){ return '$'+Number(n).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}); },
+  setTitle(t){ STATE.convoTitle=t; if(STATE.view==='convo') $('atwTitle').textContent=t; },
+  expand(){ if(STATE.mode!=='full') setMode('full'); },
+  user(text){
+    const d=document.createElement('div'); d.className='m-user'; d.textContent=text;
+    chat.appendChild(d); scrollChat();
+  },
+  atlas(html, delay=620){
+    return new Promise(resolve=>{
+      const t=document.createElement('div'); t.className='m-atlas';
+      t.innerHTML=`<div class="atlas-label">${HEX}<span>Atlas</span></div><div class="m-typing"><i></i><i></i><i></i></div>`;
+      chat.appendChild(t); scrollChat();
+      setTimeout(()=>{ t.innerHTML=`<div class="atlas-label">${HEX}<span>Atlas</span></div>${html}`; scrollChat(); resolve(t); }, delay);
+    });
+  },
+  chips(list){
+    chipsEl.innerHTML='';
+    (list||[]).forEach(c=>{
+      const b=document.createElement('button'); b.className='chip '+((c.cls)||''); b.textContent=c.label;
+      b.onclick=()=>{ chipsEl.innerHTML=''; api.user(c.label); c.on&&c.on(); };
+      chipsEl.appendChild(b);
+    });
+    scrollChat();
+  },
+  panel(html){ panelEl.innerHTML=html; },
+  progress(left, total){
+    const bar=$('atwProgress'); if(!bar) return;
+    if(total==null){ bar.classList.add('hidden'); return; }
+    bar.classList.remove('hidden');
+    const done=total-left;
+    $('apgTxt').innerHTML=left===0
+      ? `<b>All ${total}</b> cost updates reviewed`
+      : `<b>${left}</b> of ${total} cost updates left to review`;
+    $('apgDone').textContent=`${done} done`;
+    $('apgFill').style.width=(total?(done/total*100):0)+'%';
+    bar.classList.toggle('apg-complete', left===0);
+  },
+};
+
+/* ════════════════════════════════════════
+   FLOW — conversation script
+════════════════════════════════════════ */
+const FLOW = (() => {
+  const UPDATES = [
+    { sku:'HVAC-REFR-002', name:'R-410A Refrigerant 25lb',      supplier:'National Refrigerants', old:175.00, new:245.00, pct:'+40.0%', reason:'EPA phase-out of R-410A is driving a global supply crunch — prices jumped 30–45% industry-wide in Q1.' },
+    { sku:'HVAC-COMP-001', name:'Scroll Compressor 3-Ton',       supplier:'Carrier Parts Direct',  old:1245.00,new:1389.50,pct:'+11.6%', reason:'Carrier revised OEM pricing on scroll compressors after aluminum input costs rose 8% in February.' },
+    { sku:'HVAC-HP-021',   name:'Heat Pump 3-Ton 18 SEER',       supplier:'Carrier Parts Direct',  old:2840.00,new:3120.00,pct:'+9.9%',  reason:'SEER2 regulation changeover — Carrier restructured heat pump pricing to reflect new higher-efficiency units.' },
+    { sku:'ELEC-PNL-005',  name:'200A Main Breaker Panel',        supplier:'Eaton Wholesale',       old:389.00, new:425.00, pct:'+9.3%',  reason:'Eaton raised distributor pricing 8–10% across their panel line due to steel and copper cost increases.' },
+  ];
+
+  let reviewIdx = 0;
+  let approved = 0, rejected = 0;
+
+  function summaryPanel(){
+    return `<div class="panel-h">This week's summary</div>
+    <div class="panel-stat-grid">
+      <div class="panel-card"><div class="panel-card-label">Updates</div><div class="panel-card-val">12</div><div class="panel-card-sub">across 3 suppliers</div></div>
+      <div class="panel-card"><div class="panel-card-label">Avg increase</div><div class="panel-card-val">+17.7%</div><div class="panel-card-sub">weighted by volume</div></div>
+      <div class="panel-card"><div class="panel-card-label">Cost impact</div><div class="panel-card-val">+$4,820</div><div class="panel-card-sub">if all approved</div></div>
+      <div class="panel-card"><div class="panel-card-label">Discontinued</div><div class="panel-card-val">2 items</div><div class="panel-card-sub">need replacements</div></div>
+    </div>
+    <div class="panel-card"><div class="panel-card-label">Top supplier increase</div><div class="panel-card-val">National Refrigerants</div><div class="panel-card-sub">R-410A up 40% — EPA phase-out driving shortage</div></div>`;
+  }
+
+  function costCard(u, idx){
+    const id=`cc_${idx}`;
+    return `<div class="cost-card" id="${id}">
+      <div class="cost-card-top">
+        <div><div class="cost-card-name">${u.name}</div><div class="cost-card-sku">${u.sku} · ${u.supplier}</div></div>
+        <span class="cost-card-pct">${u.pct}</span>
+      </div>
+      <div class="cost-card-prices">${api.money(u.old)} → <b>${api.money(u.new)}</b></div>
+      <div class="cost-card-actions">
+        <button class="cca-btn approve" onclick="FLOW.approve(${idx})">Approve</button>
+        <button class="cca-btn" onclick="FLOW.explain(${idx})">Why?</button>
+        <button class="cca-btn reject" onclick="FLOW.reject(${idx})">Reject</button>
+      </div>
+    </div>`;
+  }
+
+  function discoCards(){
+    return `<div class="cost-card">
+      <div class="cost-card-top">
+        <div><div class="cost-card-name">R-22 Refrigerant 30lb</div><div class="cost-card-sku">HVAC-REFR-001 · National Refrigerants</div></div>
+        <span style="font-size:12px;font-weight:700;color:#d62100">Discontinued</span>
+      </div>
+      <div style="font-size:12px;color:#707070;margin-bottom:8px">No longer available. Suggested replacement: R-410A 25lb</div>
+      <div class="cost-card-actions">
+        <button class="cca-btn approve" onclick="FLOW.swapItem()">Swap to R-410A</button>
+        <button class="cca-btn reject" onclick="FLOW.removeItem()">Remove</button>
+      </div>
+    </div>`;
+  }
+
+  return {
+    async start(api){
+      api.progress(STATE.pendingTotal, STATE.pendingTotal);
+      api.expand();
+      await api.atlas(`<div class="m-txt">You have <b>12 cost updates</b> this week — mostly HVAC supplier increases driven by the R-410A phase-out and Carrier OEM repricing.<br><br>2 items have also been <b>discontinued</b> and need replacements. Want me to walk you through the biggest ones first?</div>`, 800);
+      api.chips([
+        { label:'Yes, show me the biggest ones', on: ()=> FLOW.showTopUpdates(api) },
+        { label:'Show all 12', on: ()=> FLOW.showAll(api) },
+        { label:'Just the discontinued items', on: ()=> FLOW.showDisco(api) },
+      ]);
+      api.panel(summaryPanel());
+    },
+
+    async showTopUpdates(api){
+      reviewIdx = 0;
+      await api.atlas(`<div class="m-txt">Here are the 4 biggest increases — they account for most of the cost impact. Review each one:</div>${UPDATES.map((u,i)=>costCard(u,i)).join('')}`, 700);
+      api.progress(STATE.pending, STATE.pendingTotal);
+      api.chips([]);
+    },
+
+    async showAll(api){
+      await api.atlas(`<div class="m-txt">Showing the top 4 right now (the remaining 8 are smaller, under +5% each). Review and approve or reject each:</div>${UPDATES.map((u,i)=>costCard(u,i)).join('')}`, 700);
+      api.progress(STATE.pending, STATE.pendingTotal);
+    },
+
+    async showDisco(api){
+      await api.atlas(`<div class="m-txt">2 items have been discontinued by the supplier and need action:</div>${discoCards()}`, 700);
+      api.chips([
+        { label:'Now show me the cost updates', on: ()=>{ api.user('Now show me the cost updates'); FLOW.showTopUpdates(api); } },
+      ]);
+    },
+
+    approve(idx){
+      const card = document.getElementById(`cc_${idx}`);
+      if(!card) return;
+      const u = UPDATES[idx];
+      card.style.opacity='0.5';
+      card.querySelectorAll('.cca-btn').forEach(b=>{ b.classList.add('done'); b.disabled=true; });
+      const tick = document.createElement('div');
+      tick.style.cssText='font-size:12px;font-weight:700;color:#077e50;margin-top:4px';
+      tick.textContent='✓ Approved';
+      card.appendChild(tick);
+      STATE.pending = Math.max(0, STATE.pending-1);
+      STATE.approved++;
+      api.progress(STATE.pending, STATE.pendingTotal);
+      if(STATE.pending===0) FLOW.allDone(api);
+    },
+
+    reject(idx){
+      const card = document.getElementById(`cc_${idx}`);
+      if(!card) return;
+      card.style.opacity='0.5';
+      card.querySelectorAll('.cca-btn').forEach(b=>{ b.classList.add('done'); b.disabled=true; });
+      const lbl = document.createElement('div');
+      lbl.style.cssText='font-size:12px;font-weight:700;color:#d62100;margin-top:4px';
+      lbl.textContent='✗ Rejected';
+      card.appendChild(lbl);
+      STATE.pending = Math.max(0, STATE.pending-1);
+      api.progress(STATE.pending, STATE.pendingTotal);
+      if(STATE.pending===0) FLOW.allDone(api);
+    },
+
+    async explain(idx){
+      const u = UPDATES[idx];
+      api.user(`Why did ${u.name} increase?`);
+      await api.atlas(`<div class="m-txt"><b>${u.name}</b><br><br>${u.reason}</div>`, 700);
+    },
+
+    async swapItem(){
+      STATE.swapped = true;
+      STATE.pending = Math.max(0, STATE.pending-1);
+      api.progress(STATE.pending, STATE.pendingTotal);
+      await api.atlas(`<div class="m-txt">Done — <b>R-22 Refrigerant 30lb</b> has been swapped to <b>R-410A 25lb</b> in your pricebook. All jobs referencing R-22 will now use the updated item.</div>`, 600);
+      api.chips([
+        { label:'Now review cost updates', on: ()=>{ api.user('Now review cost updates'); FLOW.showTopUpdates(api); } },
+      ]);
+    },
+
+    async removeItem(){
+      STATE.pending = Math.max(0, STATE.pending-1);
+      api.progress(STATE.pending, STATE.pendingTotal);
+      await api.atlas(`<div class="m-txt">Removed from your pricebook. You can re-add it later from the catalog if needed.</div>`, 500);
+    },
+
+    async allDone(api){
+      await api.atlas(`<div class="m-txt">🎉 <b>All ${STATE.pendingTotal} updates reviewed!</b> Your pricebook is up to date.<br><br>Approved changes are live immediately. Want a summary to share with your team?</div>`, 800);
+      api.chips([
+        { label:'Yes, give me a summary', on: ()=> FLOW.finalSummary(api) },
+        { label:'I\'m done for now',       on: ()=>{ api.user('I\'m done for now'); api.atlas('<div class="m-txt">Got it! Your pricebook is all set. Come back anytime.</div>', 500); } },
+      ]);
+    },
+
+    async finalSummary(api){
+      api.user('Yes, give me a summary');
+      const appr = STATE.pendingTotal - STATE.pending;
+      await api.atlas(`<div class="m-txt"><b>Review complete</b><br><ul>
+        <li>${appr} updates approved</li>
+        <li>${STATE.pendingTotal - appr} rejected</li>
+        <li>${STATE.swapped ? '1 discontinued item swapped' : '2 discontinued items pending'}</li>
+      </ul><br>Net cost impact on your pricebook: approx. <b>+$4,820</b> vs last month. I've noted this in your audit trail.</div>`, 900);
+    },
+
+    async freeform(api, text){
+      const t = text.toLowerCase();
+      if(t.includes('r-410a') || t.includes('refrigerant') || t.includes('410')){
+        await api.atlas(`<div class="m-txt">R-410A prices jumped <b>40%</b> because the EPA is phasing out R-410A under the AIM Act. Manufacturers are reducing production ahead of the 2025 ban, causing a supply shortage. This is industry-wide — all suppliers are seeing similar increases.<br><br>Long-term, you'll want to transition to R-454B or R-32 systems.</div>`, 800);
+      } else if(t.includes('discontinu') || t.includes('r-22')){
+        await FLOW.showDisco(api);
+      } else if(t.includes('summary') || t.includes('overview') || t.includes('what') ){
+        await api.atlas(`<div class="m-txt">This week you have <b>12 cost updates</b> across 3 suppliers, averaging +17.7%. The biggest driver is the R-410A refrigerant shortage (+40%). 2 items have been discontinued and need replacements.</div>`, 700);
+        api.chips([
+          { label:'Show me the updates', on: ()=>{ api.user('Show me the updates'); FLOW.showTopUpdates(api); } },
+          { label:'Show discontinued items', on: ()=>{ api.user('Show discontinued items'); FLOW.showDisco(api); } },
+        ]);
+      } else {
+        await api.atlas(`<div class="m-txt">I can help with that. For now, this prototype is focused on the catalog cost updates — try asking about the R-410A increase, discontinued items, or say "show me the updates" to get started.</div>`, 700);
+        api.chips([
+          { label:'Show me the updates', on: ()=>{ api.user('Show me the updates'); FLOW.showTopUpdates(api); } },
+        ]);
+      }
+    },
+  };
+})();
+
+/* ── Wire controls ── */
+updateBadge();
+$('hexBtn').onclick = toggleAtlas;
+$('explainBtn').onclick = ()=>{ openAtlas('convo'); startConvo(); };
+$('closeAtw').onclick = closeAtlas;
+$('toggleSize').onclick = ()=> setMode(STATE.mode==='full'?'window':'full');
+$('viewChatsBtn').onclick = ()=> showView('chats');
+$('newChatBtn').onclick = newChat;
+$('newChatTop').onclick = newChat;
+
+function freeText(){
+  const v=$('atInput').value.trim(); if(!v) return;
+  $('atInput').value='';
+  if(!STATE.started){ startConvo(); } else { showView('convo'); }
+  api.user(v);
+  FLOW.freeform(api, v);
+}
+$('atSend').onclick = freeText;
+$('atInput').addEventListener('keydown', e=>{ if(e.key==='Enter') freeText(); });
+
+/* ── Draggable split (full mode) ── */
+(function(){
+  const atw=$('atw'), resizer=$('atwResizer'), body=atw.querySelector('.atw-body');
+  const MIN_L=360, MIN_R=440;
+  let dragging=false;
+  try{ const s=localStorage.getItem('atlasSplitW'); if(s) atw.style.setProperty('--atw-left-w',parseInt(s,10)+'px'); }catch(e){}
+  function onMove(e){
+    if(!dragging) return;
+    const r=body.getBoundingClientRect();
+    const w=Math.max(MIN_L,Math.min(e.clientX-r.left,r.width-MIN_R));
+    atw.style.setProperty('--atw-left-w',w+'px');
+  }
+  function onUp(){
+    if(!dragging) return; dragging=false; resizer.classList.remove('dragging');
+    document.body.style.userSelect=''; document.body.style.cursor='';
+    window.removeEventListener('pointermove',onMove); window.removeEventListener('pointerup',onUp);
+    try{ localStorage.setItem('atlasSplitW',parseInt(atw.style.getPropertyValue('--atw-left-w'),10)); }catch(e){}
+  }
+  resizer.addEventListener('pointerdown',e=>{
+    if(!(STATE.mode==='full' && STATE.view==='convo')) return;
+    e.preventDefault(); dragging=true; resizer.classList.add('dragging');
+    document.body.style.userSelect='none'; document.body.style.cursor='col-resize';
+    window.addEventListener('pointermove',onMove); window.addEventListener('pointerup',onUp);
+  });
+  resizer.addEventListener('dblclick',()=>{ atw.style.removeProperty('--atw-left-w'); try{ localStorage.removeItem('atlasSplitW'); }catch(e){} });
+})();
+
+/* ── Embed mode ── */
+const EMBED = /[?&]embed=1/.test(location.search);
+if(EMBED){
+  document.body.classList.add('atlas-embed');
+  document.documentElement.classList.add('atlas-embed');
+  openAtlas('convo');
+  startConvo();
+}
+</script>
+</body>
+</html>
