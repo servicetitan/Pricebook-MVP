@@ -4108,7 +4108,7 @@ render();
 // close catalog filter dropdowns on outside click
 document.addEventListener('click', ()=>{ if(openMenu){ openMenu = null; rerenderCatControl(); } });
 
-/* ---------- Atlas overlay (inline — no iframe needed) ---------- */
+/* ---------- Atlas overlay (inline — real design CSS) ---------- */
 (function(){
   let _ready = false;
 
@@ -4116,426 +4116,677 @@ document.addEventListener('click', ()=>{ if(openMenu){ openMenu = null; rerender
     if(_ready) return; _ready = true;
 
     if(!document.getElementById('atlas-css')){
-      const s = document.createElement('style'); s.id = 'atlas-css';
-      s.textContent = "\n/* ── Reset ── */\n*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}\nhtml,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Nunito Sans',sans-serif;font-size:14px;color:#1a1a1a}\n\n/* ── Embed mode: transparent body, no mock backdrop ── */\nhtml.atlas-embed,body.atlas-embed{background:transparent!important;overflow:hidden}\nbody.atlas-embed #stage .topnav,body.atlas-embed #stage .work{display:none}\n\n/* ═══════════════════════════════════════════\n   ATLAS WINDOW\n═══════════════════════════════════════════ */\n.atw{\n  position:fixed;\n  background:#fff;\n  display:flex;flex-direction:column;\n  overflow:hidden;\n  z-index:9100;\n  box-shadow:0 8px 40px rgba(0,0,0,.18),0 2px 8px rgba(0,0,0,.08);\n}\n.atw.hidden{display:none}\n\n/* Window mode — bottom-right corner chat */\n.atw.atw--window{\n  bottom:20px;right:20px;\n  width:400px;height:580px;\n  border-radius:12px;\n}\n\n/* Full mode — covers full viewport */\n.atw.atw--full{\n  inset:0;\n  width:100%;height:100%;\n  border-radius:0;\n}\n\n/* ── Header ── */\n.atw-head{\n  flex:none;display:flex;align-items:center;justify-content:space-between;\n  padding:0 14px;height:52px;\n  border-bottom:1px solid #e8e8e8;background:#fff;\n}\n.atw-title{\n  font-size:15px;font-weight:600;color:#1a1a1a;\n  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;\n  max-width:260px;\n}\n.atw-hicons{display:flex;align-items:center;gap:2px;flex-shrink:0}\n.ic-btn{\n  width:32px;height:32px;display:inline-flex;align-items:center;justify-content:center;\n  border:none;background:none;border-radius:6px;cursor:pointer;color:#545454;\n}\n.ic-btn:hover{background:#f1f1f1}\n.ic-btn svg{width:18px;height:18px}\n\n/* ── Body ── */\n.atw-body{flex:1;display:flex;overflow:hidden;min-height:0}\n\n/* Left chat pane */\n.atw-left{\n  flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden;\n  border-right:1px solid #e8e8e8;\n}\n.atw--window .atw-left{border-right:none}\n\n/* Right detail pane — hidden in window mode */\n.atw-right{\n  width:820px;flex-shrink:0;\n  overflow-y:auto;\n  padding:28px 32px;\n  display:none;\n  background:#fff;\n}\n.atw--full .atw-right{display:block}\n\n/* ── Chat scroll area ── */\n.chat{\n  flex:1;overflow-y:auto;\n  padding:24px 20px 8px;\n  display:flex;flex-direction:column;gap:20px;\n  min-height:0;\n}\n\n/* ── Message styles — plain, no bubble ── */\n.m-atlas-wrap{display:flex;flex-direction:column;gap:4px}\n.m-label{\n  font-size:12px;font-weight:600;color:#8b8b8b;\n  margin-bottom:2px;\n}\n.m-body{\n  font-size:14px;line-height:1.6;color:#1a1a1a;\n}\n.m-body p{margin-bottom:8px}\n.m-body p:last-child{margin-bottom:0}\n.m-body strong,.m-body b{font-weight:700}\n.m-body ul{padding-left:20px;margin:6px 0}\n.m-body ul li{margin-bottom:4px}\n\n/* Typing indicator */\n.m-typing{display:flex;align-items:center;gap:4px;padding:4px 0}\n.m-typing i{\n  width:6px;height:6px;border-radius:50%;background:#a8a8a8;display:block;\n  animation:bounce .9s ease-in-out infinite;\n}\n.m-typing i:nth-child(2){animation-delay:.15s}\n.m-typing i:nth-child(3){animation-delay:.3s}\n@keyframes bounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-5px)}}\n\n/* User message */\n.m-user{\n  align-self:flex-end;max-width:80%;\n  background:#0265dc;color:#fff;\n  border-radius:16px 16px 4px 16px;\n  padding:9px 14px;font-size:14px;line-height:1.5;\n}\n\n/* ── Chips ── */\n.chips{\n  flex:none;display:flex;flex-wrap:wrap;gap:8px;\n  padding:8px 20px 12px;\n}\n.chip{\n  padding:7px 14px;\n  border:1px solid #c4c4c4;border-radius:20px;\n  background:#fff;cursor:pointer;\n  font-size:13px;font-weight:500;font-family:inherit;color:#1a1a1a;\n  white-space:nowrap;\n  transition:border-color .12s,background .12s;\n}\n.chip:hover{background:#f6f6f6;border-color:#8b8b8b}\n\n/* ── Input footer ── */\n.atw-foot{flex:none;padding:12px 16px 10px}\n.foot-input{\n  display:flex;align-items:center;gap:4px;\n  border:1px solid #c4c4c4;border-radius:24px;\n  padding:0 8px 0 16px;background:#fff;\n  transition:border-color .15s;\n}\n.foot-input:focus-within{border-color:#0265dc}\n.foot-input input{\n  flex:1;border:none;background:none;\n  font-family:inherit;font-size:14px;height:40px;\n  outline:none;color:#1a1a1a;\n}\n.foot-input input::placeholder{color:#8b8b8b}\n.foot-send{\n  width:32px;height:32px;\n  display:inline-flex;align-items:center;justify-content:center;\n  border:none;background:none;border-radius:50%;\n  cursor:pointer;color:#8b8b8b;flex-shrink:0;\n}\n.foot-send:hover{color:#0265dc}\n.foot-send svg{width:17px;height:17px}\n.foot-disc{\n  font-size:11px;color:#8b8b8b;\n  text-align:center;margin-top:6px;line-height:1.4;\n}\n\n/* ══════════════════════════════════════════\n   RIGHT PANEL — Stats + Chart\n══════════════════════════════════════════ */\n.panel-section-label{\n  font-size:11px;font-weight:700;color:#8b8b8b;\n  letter-spacing:.06em;text-transform:uppercase;\n  margin-bottom:14px;\n}\n.stat-cards{display:flex;gap:12px;margin-bottom:28px}\n.stat-card{\n  flex:1;padding:16px 18px;\n  border:1px solid #e8e8e8;border-radius:10px;\n  background:#fff;\n}\n.stat-card-label{font-size:12px;color:#8b8b8b;margin-bottom:6px;font-weight:500}\n.stat-card-val{font-size:26px;font-weight:700;color:#1a1a1a;line-height:1;margin-bottom:5px}\n.stat-card-sub{font-size:12px;font-weight:600}\n.sub-orange{color:#e37700}\n.sub-red{color:#d62100}\n.sub-muted{color:#8b8b8b}\n\n/* Bar chart */\n.chart-wrap{\n  border:1px solid #e8e8e8;border-radius:10px;\n  padding:20px 24px 16px;background:#fff;\n}\n.chart-title{font-size:11px;font-weight:700;color:#8b8b8b;letter-spacing:.06em;text-transform:uppercase;margin-bottom:24px}\n.bar-chart{display:flex;align-items:flex-end;gap:32px;height:140px;position:relative}\n.bar-chart::before{\n  content:'';position:absolute;left:0;right:0;bottom:0;\n  height:1px;background:#e8e8e8;\n}\n.bar-col{display:flex;flex-direction:column;align-items:center;gap:8px;position:relative}\n.bar-val{font-size:12px;font-weight:600;color:#1a1a1a}\n.bar{width:44px;border-radius:4px 4px 0 0;min-height:4px}\n.bar-blue{background:#1a82ff}\n.bar-purple{background:#9688d7}\n.bar-teal{background:#10c2e2}\n.bar-label{font-size:12px;color:#545454;white-space:nowrap}\n\n/* All Chats view */\n.view-chats-pane{flex:1;display:flex;flex-direction:column;overflow:hidden;min-height:0;padding:8px 0}\n.newchat-btn{\n  display:flex;align-items:center;gap:7px;\n  margin:4px 12px 8px;padding:0 14px;height:36px;\n  border:1px solid #dfdfdf;background:#fff;border-radius:8px;\n  cursor:pointer;font-size:13px;font-weight:600;font-family:inherit;color:#1a1a1a;\n}\n.newchat-btn:hover{background:#f6f6f6}\n.newchat-btn svg{width:16px;height:16px}\n.chats-list{flex:1;overflow-y:auto;padding:0 8px}\n.chat-card{\n  width:100%;text-align:left;background:none;border:none;\n  border-radius:8px;padding:10px 12px;cursor:pointer;font-family:inherit;\n  display:block;\n}\n.chat-card:hover{background:#f6f6f6}\n.chat-card.unread{background:#e6f1ff}\n.chat-card.unread:hover{background:#dceeff}\n.cgc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:3px}\n.cgc-title{font-weight:600;font-size:13px;color:#1a1a1a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px}\n.cgc-meta{display:flex;align-items:center;gap:5px;flex-shrink:0}\n.cgc-time{font-size:11px;color:#8b8b8b}\n.cgc-dot{width:7px;height:7px;border-radius:50%;background:#0265dc}\n.cgc-prev{font-size:12px;color:#8b8b8b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}\n\n/* Badge on hex button (in host page) */\n.hex-badge{\n  position:absolute;top:2px;right:2px;\n  min-width:16px;height:16px;border-radius:8px;\n  background:#d62100;color:#fff;\n  font-size:10px;font-weight:700;\n  display:flex;align-items:center;justify-content:center;\n  padding:0 4px;border:2px solid #fff;\n}\n.hex-badge.hidden{display:none}\n\n/* SVG helper */\n.ic{display:inline-block;vertical-align:middle;width:20px;height:20px;flex-shrink:0}\n";
+      const s = document.createElement('style');
+      s.id = 'atlas-css';
+      s.textContent = "/* ============================================================\n   Atlas × Updates & Alerts — exploration prototype\n   Atlas design language (Sofia Pro display / Nunito Sans body),\n   layered on Anvil2 tokens.\n   ============================================================ */\n* { box-sizing: border-box; }\n.ic { width: 1em; height: 1em; display: inline-block; vertical-align: middle; flex: none; }\n.tn-search .ic { width: 16px; height: 16px; }\nhtml, body { margin: 0; height: 100%; }\nbody {\n  font-family: var(--a2-font-family-base);\n  color: rgb(20,20,20);\n  background: var(--a2-color-blue-grey-10, #f3f5f7);\n}\n:root {\n  --atlas-blue: rgb(2,101,220);\n  --atlas-ink: rgb(20,20,20);\n  --atlas-sub: rgb(96,97,98);\n  --atlas-line: rgb(223,224,225);\n  --atlas-surface: rgb(247,247,247);\n}\n\n/* ---------- backdrop: simplified Updates page ---------- */\n.stage { position: fixed; inset: 0; display: flex; flex-direction: column; overflow: hidden; }\n.topnav { flex: none; height: 56px; background: #fff; border-bottom: 1px solid var(--atlas-line); display: flex; align-items: center; gap: 16px; padding: 0 18px; z-index: 5; }\n.tn-logo { font-family: var(--a2-font-family-display); font-weight: 700; font-size: 18px; letter-spacing: -.01em; color: var(--atlas-ink); }\n.tn-search { flex: 1 1 auto; max-width: 540px; height: 36px; border: 1px solid var(--a2-color-neutral-200); border-radius: 8px; background: var(--a2-color-neutral-20); display: flex; align-items: center; padding: 0 12px; color: var(--atlas-sub); font-size: 14px; }\n.tn-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }\n.tn-icon { width: 36px; height: 36px; border-radius: 8px; border: none; background: transparent; color: var(--a2-color-neutral-600); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }\n.tn-icon:hover { background: var(--a2-background-color-secondary); }\n.tn-icon svg { width: 20px; height: 20px; }\n/* hexagon entry */\n.hex-wrap { position: relative; display: inline-flex; }\n.hex-btn { position: relative; width: 38px; height: 38px; border-radius: 9px; border: none; background: transparent; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }\n.hex-btn:hover { background: var(--a2-color-blue-50); }\n.hex-mark { width: 24px; height: 24px; display: block; }\n/* unread badge (Atlas Framework v1.2 — 20px, rgb(225,50,18), white bold count) */\n.hex-badge { position: absolute; top: 1px; right: 1px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 999px; background: rgb(225,50,18); color: #fff; font-size: 11px; font-weight: 700; letter-spacing: .04em; line-height: 18px; text-align: center; box-shadow: 0 0 0 2px #fff; }\n.hex-badge.hidden { display: none; }\n/* NorthStar-only annotation on the nav entry */\n.ns-tag { position: absolute; top: calc(100% + 8px); right: 0; white-space: nowrap; font-size: 11px; font-weight: 700; color: var(--a2-color-neutral-600); background: var(--a2-color-neutral-20); border: 1px dashed var(--a2-color-neutral-300); border-radius: 6px; padding: 3px 8px; opacity: 0; transform: translateY(-3px); transition: opacity var(--a2-duration-default) var(--a2-transition-ease), transform var(--a2-duration-default) var(--a2-transition-ease); pointer-events: none; z-index: 6; }\n.hex-wrap:hover .ns-tag { opacity: 1; transform: none; }\n\n.work { flex: 1 1 auto; overflow: hidden; position: relative; padding: 28px 40px; }\n.work-h1 { font-family: var(--a2-font-family-display); font-weight: 700; font-size: 26px; letter-spacing: -.015em; margin: 0 0 4px; }\n.work-sub { font-size: 14px; color: var(--atlas-sub); margin: 0 0 20px; }\n.work-actions { display: flex; gap: 10px; margin-bottom: 18px; }\n.btn-atlas { display: inline-flex; align-items: center; gap: 8px; height: 38px; padding: 0 16px 0 12px; border: 1px solid var(--a2-color-neutral-300); border-radius: 8px; background: #fff; color: var(--atlas-ink); font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer; }\n.btn-atlas:hover { background: var(--a2-background-color-secondary); }\n.btn-atlas .hex-mark { width: 18px; height: 18px; }\n/* faux updates table behind */\n.faux { background: #fff; border: 1px solid var(--atlas-line); border-radius: 12px; overflow: hidden; max-width: 1080px; }\n.faux-row { display: grid; grid-template-columns: 2fr 1.4fr 1fr 1fr 1.1fr; gap: 16px; padding: 14px 18px; border-bottom: 1px solid var(--a2-color-neutral-80); align-items: center; }\n.faux-row:last-child { border-bottom: none; }\n.faux-row.h { background: var(--a2-color-neutral-20); font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--a2-color-neutral-600); }\n.faux-nm { font-size: 14px; font-weight: 700; color: var(--atlas-ink); }\n.faux-sub { font-size: 12px; color: var(--a2-color-neutral-500); margin-top: 2px; }\n.faux-cell { font-size: 14px; color: var(--a2-color-neutral-700); font-variant-numeric: tabular-nums; }\n.faux .up { color: var(--a2-color-red-600); font-weight: 700; }\n.faux .down { color: var(--a2-color-green-600); font-weight: 700; }\n.faux-chip { display: inline-flex; align-items: center; height: 22px; padding: 0 10px; border-radius: 999px; font-size: 12px; font-weight: 700; background: var(--a2-color-yellow-50, #fff9e2); color: var(--a2-color-yellow-700); border: 1px solid var(--a2-color-yellow-200, #ffe9a8); }\n.stage.dim .work::after { content: ''; position: absolute; inset: 0; background: rgba(20,20,20,.18); }\n\n/* ---------- embedded overlay mode ---------- */\nhtml.atlas-embed, body.atlas-embed { background: transparent !important; }\nbody.atlas-embed .topnav, body.atlas-embed .work { display: none; }\nbody.atlas-embed .stage { background: transparent; }\n\n/* ---------- header title badge + view panes ---------- */\n.atw-titlebadge { min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px; background: rgb(225,50,18); color: #fff; font-size: 12px; font-weight: 700; line-height: 20px; text-align: center; }\n.atw-titlebadge.hidden { display: none; }\n.view-pane { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }\n\n/* ---------- All Chats list ---------- */\n.newchat-btn { flex: none; display: flex; align-items: center; justify-content: center; gap: 8px; margin: 12px 12px 4px; height: 40px; border: 1px solid var(--a2-color-neutral-200); border-radius: 8px; background: var(--a2-background-color-secondary); color: var(--atlas-ink); font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer; }\n.newchat-btn:hover { background: var(--a2-background-color-secondary-hover); }\n.newchat-btn .ic { width: 16px; height: 16px; }\n.atw--full .newchat-btn { margin: 16px 16px 6px; }\n.chats-list { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 8px 12px 12px; display: flex; flex-direction: column; gap: 8px; }\n.atw--full .chats-list { padding: 8px 16px 16px; }\n.chat-card { text-align: left; border: 1px solid var(--atlas-line); border-radius: 10px; background: #fff; padding: 12px 14px; cursor: pointer; font-family: inherit; transition: border-color var(--a2-duration-default) var(--a2-transition-ease), background var(--a2-duration-default) var(--a2-transition-ease); }\n.chat-card:hover { border-color: var(--atlas-blue); background: var(--a2-color-blue-50); }\n.chat-card.unread { background: var(--a2-color-blue-50); border-color: var(--a2-color-blue-100); }\n.cgc-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 4px; }\n.cgc-title { font-size: 14px; font-weight: 600; color: var(--atlas-ink); }\n.chat-card.unread .cgc-title { font-weight: 700; }\n.cgc-meta { display: inline-flex; align-items: center; gap: 7px; flex: none; }\n.cgc-time { font-size: 12px; color: var(--a2-color-neutral-500); }\n.cgc-dot { width: 8px; height: 8px; border-radius: 50%; background: rgb(225,50,18); }\n.cgc-prev { font-size: 13px; line-height: 1.45; color: var(--a2-color-neutral-600); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }\n.chat-card.unread .cgc-prev { color: var(--a2-color-neutral-800); font-weight: 600; }\n\n/* ---------- welcome / new chat ---------- */\n#viewWelcome { align-items: stretch; }\n.welcome { flex: 1 1 auto; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 24px 20px; gap: 4px; }\n.welcome-hex .hex-mark { width: 40px; height: 40px; }\n.welcome-h { font-family: var(--a2-font-family-display); font-weight: 700; font-size: 22px; margin: 10px 0 0; color: var(--atlas-ink); }\n.welcome-sub { font-size: 14px; color: var(--a2-color-neutral-600); margin: 0 0 16px; }\n.welcome-sugg { display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 360px; }\n.welcome-chip { display: flex; align-items: center; justify-content: space-between; gap: 10px; text-align: left; border: 1px solid var(--a2-color-neutral-200); background: #fff; border-radius: 10px; padding: 12px 14px; font-family: inherit; font-size: 14px; font-weight: 600; color: var(--atlas-ink); cursor: pointer; }\n.welcome-chip:hover { border-color: var(--atlas-blue); background: var(--a2-color-blue-50); }\n.welcome-chip .ic { width: 16px; height: 16px; color: var(--atlas-blue); flex: none; }\n\n/* view-dependent layout: split only in conversation */\n.atw-right { display: none; }\n.atw--full.view-convo .atw-right { display: block; }\n/* full-screen split: left pane width is user-draggable via the divider.\n   max/min clamps guarantee the right (detail) pane keeps a usable width. */\n.atw--full.view-convo .atw-left {\n  flex: 0 0 var(--atw-left-w, 520px);\n  min-width: 360px;\n  max-width: calc(100% - 440px);\n  border-right: none;\n}\n.atw--full.view-chats .atw-left,\n.atw--full.view-welcome .atw-left { max-width: 600px; margin: 0 auto; border-right: none; }\n\n/* draggable divider between chat + detail panel */\n.atw-resizer { display: none; }\n.atw--full.view-convo .atw-resizer {\n  display: block; flex: 0 0 1px; position: relative; z-index: 3;\n  background: var(--atlas-line); cursor: col-resize;\n  transition: background var(--a2-duration-default) var(--a2-transition-ease);\n}\n/* widened invisible hit area so the thin line is easy to grab */\n.atw-resizer::before { content: ''; position: absolute; inset: 0 -5px; cursor: col-resize; }\n/* grip indicator, revealed on hover / while dragging */\n.atw-resizer::after {\n  content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);\n  width: 4px; height: 40px; border-radius: 999px; background: var(--a2-color-neutral-300);\n  opacity: 0; transition: opacity var(--a2-duration-default) var(--a2-transition-ease);\n}\n.atw-resizer:hover, .atw-resizer.dragging { background: var(--atlas-blue); }\n.atw-resizer:hover::after, .atw-resizer.dragging::after { opacity: 1; background: var(--atlas-blue); }\n/* footer only where typing makes sense */\n.view-welcome .atw-foot, .view-convo .atw-foot, .view-chats .atw-foot { display: block; }\n\n.nudge-no:hover { background: var(--a2-background-color-secondary); }\n\n/* ============================================================\n   Atlas Window\n   ============================================================ */\n.atw { position: fixed; z-index: 60; background: var(--atlas-surface); border: 1px solid var(--atlas-line); box-shadow: 0 16px 48px rgba(20,20,20,.22); display: flex; flex-direction: column; overflow: hidden; }\n.atw.hidden { display: none; }\n.atw--window { right: 24px; bottom: 24px; width: 396px; height: 640px; max-height: calc(100vh - 48px); border-radius: 14px; animation: atwIn .26s var(--a2-transition-ease-out) both; }\n@keyframes atwIn { from { opacity:0; transform: translateY(16px) scale(.99); } to { opacity:1; transform:none; } }\n.atw--full { inset: 0; width: 100%; height: 100%; border-radius: 0; border: none; }\n\n/* header */\n.atw-head { flex: none; height: 56px; background: #fff; border-bottom: 1px solid var(--atlas-line); display: flex; align-items: center; gap: 8px; padding: 0 12px 0 16px; }\n.atw-title-wrap { display: flex; align-items: center; gap: 8px; min-width: 0; flex: 1 1 auto; }\n.atw-title { font-family: var(--a2-font-family-display); font-weight: 700; font-size: 16px; color: var(--atlas-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }\n.atw-hicons { display: flex; align-items: center; gap: 2px; }\n.ic-btn { width: 32px; height: 32px; border-radius: 7px; border: none; background: transparent; color: var(--a2-color-neutral-600); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }\n.ic-btn:hover { background: var(--a2-background-color-secondary); color: var(--atlas-ink); }\n.ic-btn svg { width: 18px; height: 18px; }\n\n/* split layout */\n.atw-body { flex: 1 1 auto; min-height: 0; display: flex; }\n.atw-left { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; min-height: 0; }\n.atw-right { flex: 1 1 auto; min-width: 0; background: #fff; overflow-y: auto; padding: 24px 28px; }\n\n/* ---------- review progress tracker ---------- */\n.atw-progress { flex: none; background: #fff; border-bottom: 1px solid var(--atlas-line); padding: 11px 16px 12px; }\n.atw--full .atw-progress { padding: 13px 28px 14px; }\n.atw-progress.hidden { display: none; }\n.apg-row { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 8px; }\n.apg-txt { font-size: 13px; color: var(--a2-color-neutral-700); }\n.apg-txt b { font-weight: 700; color: var(--atlas-ink); }\n.apg-count { font-size: 12px; font-weight: 700; color: var(--a2-color-neutral-500); white-space: nowrap; }\n.apg-track { height: 6px; border-radius: 999px; background: var(--a2-color-neutral-100); overflow: hidden; }\n.apg-fill { height: 100%; width: 0; border-radius: 999px; background: var(--atlas-blue); transition: width var(--a2-duration-slow) var(--a2-transition-ease-out); }\n.atw-progress.apg-complete .apg-fill { background: var(--a2-color-green-600); }\n.atw-progress.apg-complete .apg-count { color: var(--a2-color-green-700); }\n\n/* chat scroll */\n.chat { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 18px 16px 8px; display: flex; flex-direction: column; gap: 16px; background: var(--atlas-surface); }\n.atw--full .chat { padding: 28px 28px 12px; gap: 20px; }\n\n/* atlas message */\n.m-atlas { display: flex; flex-direction: column; gap: 8px; animation: msgIn .28s var(--a2-transition-ease-out) both; }\n.atlas-label { display: inline-flex; align-items: center; gap: 7px; }\n.atlas-label .hex-mark { width: 16px; height: 16px; }\n.atlas-label span { font-weight: 700; font-size: 14px; color: var(--atlas-ink); }\n.m-atlas .m-txt { font-size: 15px; line-height: 1.5; color: rgb(4,4,4); }\n.atw--full .m-atlas .m-txt { font-size: 16px; line-height: 1.55; }\n.m-atlas .m-txt b { font-weight: 700; }\n.m-atlas h4 { font-family: var(--a2-font-family-display); font-weight: 700; font-size: 17px; margin: 4px 0 0; letter-spacing: -.01em; }\n.m-atlas ul { margin: 2px 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; }\n.m-atlas li { font-size: 15px; line-height: 1.5; }\n.m-typing { display: inline-flex; gap: 4px; padding: 4px 0; }\n.m-typing i { width: 7px; height: 7px; border-radius: 50%; background: var(--a2-color-neutral-400); animation: dot 1.2s infinite; }\n.m-typing i:nth-child(2){ animation-delay: .15s; } .m-typing i:nth-child(3){ animation-delay: .3s; }\n@keyframes dot { 0%,60%,100%{ opacity:.3; transform: translateY(0);} 30%{ opacity:1; transform: translateY(-3px);} }\n@keyframes msgIn { from { opacity:0; transform: translateY(6px);} to { opacity:1; transform:none; } }\n\n/* user message */\n.m-user { align-self: flex-end; max-width: 84%; background: rgb(238,238,238); color: var(--atlas-ink); font-size: 15px; line-height: 1.45; padding: 10px 14px; border-radius: 14px 14px 4px 14px; animation: msgIn .2s var(--a2-transition-ease-out) both; }\n\n/* in-chat cost card */\n.cc-card { background: #fff; border: 1px solid var(--atlas-line); border-radius: 10px; padding: 14px; }\n.cc-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }\n.cc-nm { font-size: 14px; font-weight: 700; color: var(--atlas-ink); line-height: 1.3; }\n.cc-sku { font-size: 12px; color: var(--a2-color-neutral-500); margin-top: 2px; }\n.cc-pct { flex: none; display: inline-flex; align-items: center; gap: 3px; font-size: 13px; font-weight: 700; padding: 3px 8px; border-radius: 999px; }\n.cc-pct.up { background: var(--a2-color-red-50); color: var(--a2-color-red-600); }\n.cc-pct.down { background: var(--a2-color-green-50); color: var(--a2-color-green-600); }\n.cc-prices { display: flex; align-items: baseline; gap: 8px; margin-top: 10px; font-variant-numeric: tabular-nums; }\n.cc-old { font-size: 14px; color: var(--a2-color-neutral-400); text-decoration: line-through; }\n.cc-arrow { color: var(--a2-color-neutral-400); }\n.cc-new { font-size: 20px; font-weight: 700; color: var(--atlas-ink); }\n.cc-meta { font-size: 12px; color: var(--a2-color-neutral-500); margin-top: 6px; }\n\n/* inline actions */\n.a-actions { display: flex; gap: 8px; flex-wrap: wrap; }\n.a-btn { display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 16px; border-radius: 8px; border: none; font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer; }\n.a-btn svg { width: 16px; height: 16px; }\n.a-approve { background: var(--atlas-blue); color: #fff; }\n.a-approve:hover { background: var(--a2-color-blue-700); }\n.a-reject { background: #fff; border: 1px solid var(--a2-color-neutral-300); color: var(--atlas-ink); }\n.a-reject:hover { background: var(--a2-background-color-secondary); }\n.a-ghost { background: transparent; color: var(--atlas-blue); padding: 0 8px; }\n.a-ghost:hover { text-decoration: underline; }\n.a-done { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; padding: 6px 0; }\n.a-done.ok { color: var(--a2-color-green-700); }\n.a-done.no { color: var(--a2-color-neutral-500); }\n.a-done svg { width: 16px; height: 16px; }\n\n/* suggestion chips */\n.chips { display: flex; flex-wrap: wrap; gap: 8px; padding: 4px 16px 12px; background: var(--atlas-surface); }\n.atw--full .chips { padding: 4px 28px 14px; }\n.chip { border: 1px solid var(--a2-color-neutral-200); background: #fff; border-radius: 999px; padding: 8px 14px; font-family: inherit; font-size: 13px; font-weight: 600; color: var(--atlas-ink); cursor: pointer; text-align: left; transition: border-color var(--a2-duration-default) var(--a2-transition-ease), background var(--a2-duration-default) var(--a2-transition-ease); }\n.chip:hover { border-color: var(--atlas-blue); background: var(--a2-color-blue-50); color: var(--atlas-blue); }\n\n/* ---------- persistent suggestion cards (agenda) ---------- */\n.agenda { display: flex; flex-direction: column; gap: 8px; }\n.ag-row { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; background: #fff; border: 1px solid var(--atlas-line); border-radius: 12px; padding: 13px 14px; font-family: inherit; cursor: pointer; transition: border-color var(--a2-duration-default) var(--a2-transition-ease), background var(--a2-duration-default) var(--a2-transition-ease), box-shadow var(--a2-duration-default) var(--a2-transition-ease); }\n.ag-row:hover { border-color: var(--atlas-blue); background: var(--a2-color-blue-50); }\n.ag-row.next { border-color: var(--a2-color-blue-200, #b9d4f7); box-shadow: 0 1px 2px rgba(20,20,20,.04); }\n.ag-mark { flex: none; width: 26px; height: 26px; display: inline-flex; align-items: center; justify-content: center; }\n.ag-mark .hex-mark { width: 22px; height: 22px; }\n.ag-row.done .ag-mark { width: 24px; height: 24px; border-radius: 50%; background: var(--a2-color-green-50); color: var(--a2-color-green-700); }\n.ag-row.done .ag-mark .ic { width: 15px; height: 15px; }\n.ag-main { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 2px; }\n.ag-label { font-size: 14px; font-weight: 700; color: var(--atlas-ink); display: flex; align-items: center; flex-wrap: wrap; column-gap: 8px; row-gap: 4px; }\n.ag-start { flex: none; white-space: nowrap; font-size: 10px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--atlas-blue); background: var(--a2-color-blue-50); border: 1px solid var(--a2-color-blue-100); border-radius: 999px; padding: 2px 8px; }\n.ag-desc { font-size: 12px; color: var(--a2-color-neutral-500); }\n.ag-row.done .ag-label { color: var(--a2-color-neutral-600); }\n.ag-row.done { background: var(--a2-color-neutral-20); border-color: var(--a2-color-neutral-100); }\n.ag-row.done:hover { background: var(--a2-color-blue-50); border-color: var(--atlas-blue); }\n.ag-chev { flex: none; color: var(--a2-color-neutral-400); }\n.ag-chev .ic { width: 18px; height: 18px; }\n.ag-wrap .ag-mark { width: 24px; height: 24px; border-radius: 50%; background: var(--a2-color-blue-50); color: var(--atlas-blue); }\n.ag-wrap .ag-mark .ic { width: 15px; height: 15px; }\n\n/* ---------- interactive right-panel table rows ---------- */\n.rp-sub2 { font-size: 12px; color: var(--a2-color-neutral-500); margin: -6px 0 10px; }\n.rt-row { cursor: pointer; transition: background var(--a2-duration-fast) var(--a2-transition-ease); }\n.rt-row:hover td { background: var(--a2-color-blue-50); }\n.rt-chev { width: 24px; color: var(--a2-color-neutral-400); }\n.rt-chev .ic { width: 16px; height: 16px; }\n.rt-row:hover .rt-chev { color: var(--atlas-blue); }\n\n/* ---------- item detail (drill-in) ---------- */\n.rp-back { display: inline-flex; align-items: center; gap: 4px; border: none; background: transparent; color: var(--atlas-blue); font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer; padding: 2px 6px 2px 0; margin-bottom: 12px; }\n.rp-back:hover { text-decoration: underline; }\n.rp-back .ic { width: 18px; height: 18px; }\n.idp-head .cc-prices { margin: 0; }\n.idp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 18px; }\n.idp-row { display: flex; flex-direction: column; gap: 2px; }\n.idp-row span { font-size: 12px; color: var(--a2-color-neutral-500); }\n.idp-row b { font-size: 14px; color: var(--atlas-ink); font-weight: 700; }\n.idp-status .st { font-size: 13px; }\n\n/* footer */\n.atw-foot { flex: none; padding: 12px 16px 14px; background: var(--atlas-surface); border-top: 1px solid var(--atlas-line); }\n.atw--full .atw-foot { padding: 14px 28px 18px; }\n.foot-input { position: relative; background: #fff; border: 1px solid rgb(148,149,150); border-radius: 8px; height: 48px; display: flex; align-items: center; padding: 0 8px 0 14px; }\n.foot-input input { flex: 1 1 auto; border: none; outline: none; font-family: inherit; font-size: 15px; color: var(--atlas-ink); background: transparent; }\n.foot-input input::placeholder { color: var(--atlas-sub); }\n.foot-send { width: 34px; height: 34px; border-radius: 7px; border: none; background: transparent; color: var(--atlas-ink); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }\n.foot-send:hover { background: var(--a2-background-color-secondary); }\n.foot-send svg { width: 18px; height: 18px; }\n.foot-disc { font-size: 12px; font-weight: 700; color: var(--atlas-sub); margin-top: 8px; }\n\n/* ---------- right detail panel ---------- */\n.rp-empty2 { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; color: var(--a2-color-neutral-400); text-align: center; }\n.rp-empty2 .hex-mark { width: 46px; height: 46px; opacity: .5; }\n.rp-empty2 span { font-size: 14px; max-width: 260px; }\n.rp-h { font-family: var(--a2-font-family-display); font-weight: 700; font-size: 13px; letter-spacing: .04em; text-transform: uppercase; color: var(--a2-color-neutral-500); margin: 0 0 12px; }\n.rp-h:not(:first-child) { margin-top: 28px; }\n.rp-stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; }\n.rp-stat { border: 1px solid var(--atlas-line); border-radius: 10px; padding: 14px; }\n.rp-stat .k { font-size: 12px; color: var(--a2-color-neutral-500); }\n.rp-stat .v { font-family: var(--a2-font-family-display); font-weight: 700; font-size: 24px; letter-spacing: -.01em; margin-top: 4px; }\n.rp-stat .d { font-size: 12px; font-weight: 700; margin-top: 4px; }\n.rp-stat .d.up { color: var(--a2-color-red-600); } .rp-stat .d.down { color: var(--a2-color-green-600); } .rp-stat .d.warn { color: var(--a2-color-yellow-700); } .rp-stat .d.neutral { color: var(--a2-color-neutral-500); }\n.rp-card { border: 1px solid var(--atlas-line); border-radius: 12px; padding: 18px; background: #fff; }\n.rp-chart-t { font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--a2-color-neutral-600); margin-bottom: 10px; }\n\n/* right-panel table */\n.rt { width: 100%; border-collapse: collapse; border: 1px solid var(--atlas-line); border-radius: 10px; overflow: hidden; font-variant-numeric: tabular-nums; }\n.rt th { text-align: left; font-size: 12px; font-weight: 700; color: var(--a2-color-neutral-600); background: var(--a2-color-neutral-20); padding: 10px 12px; border-bottom: 1px solid var(--atlas-line); }\n.rt td { padding: 11px 12px; border-bottom: 1px solid var(--a2-color-neutral-80); font-size: 13px; color: var(--a2-color-neutral-800); }\n.rt tr:last-child td { border-bottom: none; }\n.rt tr.act td { background: var(--a2-color-blue-50); }\n.rt .nm { font-weight: 700; color: var(--atlas-ink); }\n.rt .up { color: var(--a2-color-red-600); font-weight: 700; }\n.rt .down { color: var(--a2-color-green-600); font-weight: 700; }\n.rt .st { display: inline-flex; align-items: center; gap: 4px; font-weight: 700; font-size: 12px; }\n.rt .st.pending { color: var(--a2-color-yellow-700); }\n.rt .st.approved { color: var(--a2-color-green-700); }\n.rt .st.rejected { color: var(--a2-color-neutral-500); }\n\n/* replacement cards */\n.rep { display: flex; flex-direction: column; gap: 10px; }\n.rep-card { display: flex; align-items: center; gap: 12px; border: 1px solid var(--atlas-line); border-radius: 10px; padding: 12px 14px; }\n.rep-card.best { border-color: var(--atlas-blue); box-shadow: inset 0 0 0 1px var(--atlas-blue); }\n.rep-ic { width: 38px; height: 38px; border-radius: 9px; flex: none; background: var(--a2-color-blue-50); color: var(--atlas-blue); display: flex; align-items: center; justify-content: center; }\n.rep-ic svg { width: 20px; height: 20px; }\n.rep-txt { flex: 1 1 auto; min-width: 0; }\n.rep-nm { font-size: 14px; font-weight: 700; color: var(--atlas-ink); }\n.rep-sub { font-size: 12px; color: var(--a2-color-neutral-500); margin-top: 2px; }\n.rep-badge { font-size: 11px; font-weight: 700; color: var(--atlas-blue); background: var(--a2-color-blue-50); border: 1px solid var(--a2-color-blue-100); border-radius: 999px; padding: 2px 8px; }\n.rep-swap { flex: none; height: 32px; padding: 0 14px; border: none; border-radius: 7px; background: var(--atlas-blue); color: #fff; font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }\n.rep-swap:hover { background: var(--a2-color-blue-700); }\n.rep-swap.done { background: var(--a2-color-green-600); }\n\n/* chart axis labels */\n.axis { font-size: 11px; fill: var(--a2-color-neutral-500); font-family: var(--a2-font-family-base); }\n.gridline { stroke: var(--a2-color-neutral-100); stroke-width: 1; }\n\n/* scrollbars */\n.chat::-webkit-scrollbar, .atw-right::-webkit-scrollbar { width: 8px; }\n.chat::-webkit-scrollbar-thumb, .atw-right::-webkit-scrollbar-thumb { background: rgba(20,20,20,.16); border-radius: 4px; }\n";
       document.head.appendChild(s);
     }
 
-    const root = document.createElement('div');
-    root.id = 'atlasRoot';
-    document.body.appendChild(root);
+    if(!document.getElementById('atlasRoot')){
+      const root = document.createElement('div');
+      root.id = 'atlasRoot';
+      document.body.appendChild(root);
+    }
 
+    /* flow script */
+    (function(){
+/* ============================================================
+   Atlas × Updates & Alerts — scripted multi-turn flow
+   window.FLOW.start(api) kicks off; api is provided by the engine.
+   Narrative thread: the R-410A refrigerant phase-out drives both
+   the 40% spike AND the discontinuation — tying scenarios together.
+   ============================================================ */
+(function(){
+  // pending cost updates (live-linked: status mutates as the user acts)
+  const U = [
+    { id:1,  name:'R-410A Refrigerant 25lb',     sku:'HVAC-REFR-002', supplier:'National Refrigerants', trade:'HVAC', old:175,  new:245,    pct:40.0, pbs:6, status:'pending' },
+    { id:2,  name:'Scroll Compressor 3-Ton',     sku:'HVAC-COMP-001', supplier:'Carrier Parts Direct',  trade:'HVAC', old:1245, new:1389.50, pct:11.6, pbs:4, status:'pending' },
+    { id:3,  name:'Heat Pump 3-Ton 18 SEER',     sku:'HVAC-HP-021',   supplier:'Carrier Parts Direct',  trade:'HVAC', old:2840, new:3120,   pct:9.9,  pbs:6, status:'pending' },
+    { id:4,  name:'Evaporator Coil 2.5-Ton',     sku:'HVAC-COIL-003', supplier:'Carrier Parts Direct',  trade:'HVAC', old:485,  new:528.25, pct:8.9,  pbs:3, status:'pending' },
+    { id:5,  name:'Condensing Unit 4-Ton',       sku:'HVAC-CU-014',   supplier:'Carrier Parts Direct',  trade:'HVAC', old:2190, new:2415,   pct:10.3, pbs:5, status:'pending' },
+    { id:6,  name:'Air Handler 2.5-Ton',         sku:'HVAC-AH-019',   supplier:'Carrier Parts Direct',  trade:'HVAC', old:865,  new:945,    pct:9.2,  pbs:4, status:'pending' },
+    { id:7,  name:'Furnace 80K BTU 2-Stage',     sku:'HVAC-FURN-002', supplier:'Carrier Parts Direct',  trade:'HVAC', old:1420, new:1565,   pct:10.2, pbs:4, status:'pending' },
+    { id:8,  name:'Mini-Split 12K BTU',          sku:'HVAC-MS-030',   supplier:'Carrier Parts Direct',  trade:'HVAC', old:980,  new:1075,   pct:9.7,  pbs:5, status:'pending' },
+    { id:9,  name:'200A Main Breaker Panel',     sku:'ELEC-PNL-005',  supplier:'Eaton Wholesale',       trade:'Electrical', old:389, new:425, pct:9.3, pbs:1, status:'pending' },
+    { id:10, name:'Disconnect Box 60A',          sku:'ELEC-DISC-009', supplier:'Eaton Wholesale',       trade:'Electrical', old:54,  new:58.75, pct:8.8, pbs:2, status:'pending' },
+    { id:11, name:'Copper Pipe ¾" Type-L 10ft',  sku:'PLB-PIPE-031',  supplier:'Ferguson Plumbing',     trade:'Plumbing', old:38.40, new:46.20, pct:20.3, pbs:6, status:'pending' },
+    { id:12, name:'PVC Schedule 40 4" 10ft',     sku:'PLB-PVC-018',   supplier:'Ferguson Plumbing',     trade:'Plumbing', old:24.90, new:28.10, pct:12.9, pbs:5, status:'pending' },
+  ];
+  const byId = (id)=> U.find(u=>u.id===id);
+  const pendingCount = ()=> U.filter(u=>u.status==='pending').length;
+  const FAUX_IDS = [1,2,3,9]; // rows shown in the backdrop table
+
+  let A, money, visited;
+
+  /* ---------- backdrop reflection (live link) ---------- */
+  function reflect(){
+    const lbl = document.getElementById('pendingLbl');
+    if(lbl){ const n = pendingCount(); lbl.textContent = `${n} cost update${n===1?'':'s'}`; }
+    if(A && A.progress) A.progress(pendingCount(), U.length);
+    document.querySelectorAll('.faux-row:not(.h)').forEach((row,i)=>{
+      const u = byId(FAUX_IDS[i]); if(!u) return;
+      const chip = row.querySelector('.faux-chip'); if(!chip) return;
+      if(u.status==='approved'){ chip.textContent='Approved'; chip.style.background='var(--a2-color-green-50)'; chip.style.color='var(--a2-color-green-700)'; chip.style.borderColor='var(--a2-color-green-200,#b6e3cc)'; }
+      else if(u.status==='rejected'){ chip.textContent='Dismissed'; chip.style.background='var(--a2-color-neutral-50)'; chip.style.color='var(--a2-color-neutral-500)'; chip.style.borderColor='var(--a2-color-neutral-200)'; }
+    });
+  }
+
+  /* ---------- render helpers ---------- */
+  function pctTag(pct){ const up=pct>=0; return `<span class="cc-pct ${up?'up':'down'}">${A.ic(up?'up':'down')}${up?'+':''}${pct.toFixed(1)}%</span>`; }
+  function costCard(u){
+    return `<div class="cc-card">
+      <div class="cc-top"><div><div class="cc-nm">${u.name}</div><div class="cc-sku">${u.sku} · ${u.supplier}</div></div>${pctTag(u.pct)}</div>
+      <div class="cc-prices"><span class="cc-old">${money(u.old)}</span><span class="cc-arrow">${A.ic('swap')}</span><span class="cc-new">${money(u.new)}</span><span class="cc-meta">/ EA · ${u.pbs} pricebook${u.pbs===1?'':'s'}</span></div>
+    </div>`;
+  }
+  const actionRow = (id)=> `<div class="a-actions" data-row="${id}">
+      <button class="a-btn a-approve" data-act="approve" data-id="${id}">${A.ic('check')}Approve</button>
+      <button class="a-btn a-reject" data-act="reject" data-id="${id}">${A.ic('close')}Reject</button>
+    </div>`;
+
+  /* bind inline approve/reject inside a freshly-rendered Atlas node */
+  function bindActions(node, onResolve){
+    node.querySelectorAll('[data-act]').forEach(b=> b.onclick = ()=>{
+      const u = byId(+b.dataset.id); const act = b.dataset.act;
+      u.status = act==='approve' ? 'approved' : 'rejected';
+      const wrap = node.querySelector(`.a-actions[data-row="${u.id}"]`);
+      if(wrap) wrap.outerHTML = act==='approve'
+        ? `<span class="a-done ok">${A.ic('check')}Approved across ${u.pbs} pricebook${u.pbs===1?'':'s'}</span>`
+        : `<span class="a-done no">${A.ic('close')}Dismissed</span>`;
+      reflect();
+      onResolve && onResolve(u, act);
+    });
+  }
+
+  /* ---------- charts (SVG) ---------- */
+  function barChart(rows){ // rows: [{label,val,color}]
+    const W=320,H=170,pad=28, max=Math.max(...rows.map(r=>r.val),1), bw=46, gap=(W-pad-rows.length*bw)/rows.length;
+    let x=pad+gap/2, bars='';
+    rows.forEach(r=>{ const h=(r.val/max)*(H-50); const y=H-30-h;
+      bars+=`<rect x="${x}" y="${y}" width="${bw}" height="${h}" rx="5" fill="${r.color}"/>`;
+      bars+=`<text class="axis" x="${x+bw/2}" y="${y-7}" text-anchor="middle" style="font-weight:700;fill:var(--a2-color-neutral-700)">${r.val}</text>`;
+      bars+=`<text class="axis" x="${x+bw/2}" y="${H-12}" text-anchor="middle">${r.label}</text>`;
+      x+=bw+gap; });
+    return `<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}">${bars}</svg>`;
+  }
+  function lineChart(vals){
+    const W=340,H=170,padL=34,padR=10,padT=14,padB=26, max=Math.max(...vals), min=Math.min(...vals);
+    const x=(i)=> padL+(i/(vals.length-1))*(W-padL-padR);
+    const y=(v)=> padT+(1-(v-min)/(max-min||1))*(H-padT-padB);
+    let grid='';
+    [0,0.25,0.5,0.75,1].forEach(g=>{ const yy=padT+g*(H-padT-padB); grid+=`<line class="gridline" x1="${padL}" y1="${yy}" x2="${W-padR}" y2="${yy}"/>`;
+      const val=Math.round(max-(g*(max-min))); grid+=`<text class="axis" x="${padL-6}" y="${yy+3}" text-anchor="end">$${val}</text>`; });
+    const pts=vals.map((v,i)=>`${x(i)},${y(v)}`).join(' ');
+    const area=`${padL},${H-padB} ${pts} ${W-padR},${H-padB}`;
+    const labels=['Jun','Aug','Oct','Dec','Feb','Apr'].map((m,i)=>`<text class="axis" x="${x(i*2)}" y="${H-8}" text-anchor="middle">${m}</text>`).join('');
+    return `<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}">
+      <defs><linearGradient id="spk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="rgba(2,101,220,.18)"/><stop offset="1" stop-color="rgba(2,101,220,0)"/></linearGradient></defs>
+      ${grid}<polygon points="${area}" fill="url(#spk)"/><polyline points="${pts}" fill="none" stroke="var(--atlas-blue)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="${x(vals.length-1)}" cy="${y(vals[vals.length-1])}" r="4" fill="var(--a2-color-red-600)"/>${labels}</svg>`;
+  }
+
+  /* ---------- panels ---------- */
+  function pendingTable(highlightId){
+    const rows = U.map(u=>`<tr class="rt-row ${u.id===highlightId?'act':''}" data-item="${u.id}">
+      <td class="nm">${u.name}<div style="font-size:11px;color:var(--a2-color-neutral-500);font-weight:400">${u.supplier}</div></td>
+      <td class="${u.pct>=0?'up':'down'}">${u.pct>=0?'+':''}${u.pct.toFixed(1)}%</td>
+      <td>${u.pbs}</td>
+      <td><span class="st ${u.status}">${u.status==='approved'?A.ic('check'):''}${u.status[0].toUpperCase()+u.status.slice(1)}</span></td>
+      <td class="rt-chev">${A.ic('chevron')}</td>
+    </tr>`).join('');
+    const n = pendingCount();
+    return `<p class="rp-h">Cost updates · ${n} pending</p>
+      <p class="rp-sub2">Click any row to see the full item detail.</p>
+      <table class="rt"><thead><tr><th>Item</th><th>%</th><th>PBs</th><th>Status</th><th></th></tr></thead><tbody>${rows}</tbody></table>`;
+  }
+  function itemDetailPanel(u){
+    const acted = u.status!=='pending';
+    // synthesize a 12-pt cost trend ending at the new price
+    const series = [];
+    for(let i=0;i<12;i++){ const t=i/11; series.push(Math.round((u.old*(1-t)+u.new*t) - Math.sin(t*3)*(u.new-u.old)*0.06)); }
+    series[11]=u.new;
+    const statusPill = u.status==='approved'
+      ? `<span class="st approved">${A.ic('check')}Approved across ${u.pbs} pricebooks</span>`
+      : u.status==='rejected' ? `<span class="st rejected">Dismissed</span>`
+      : `<span class="st pending">Pending review</span>`;
+    return `<button class="rp-back" data-back>${A.ic('chevron_left')} All cost updates</button>
+      <p class="rp-h">${u.name}</p>
+      <div class="rp-card idp-head">
+        <div class="cc-prices"><span class="cc-old">${money(u.old)}</span><span class="cc-arrow">${A.ic('swap')}</span><span class="cc-new">${money(u.new)}</span>${pctTag(u.pct)}</div>
+        <div class="cc-meta">per EA · effective this cycle</div>
+      </div>
+      <p class="rp-h">Details</p>
+      <div class="rp-card idp-grid">
+        <div class="idp-row"><span>Item code</span><b>${u.sku}</b></div>
+        <div class="idp-row"><span>Supplier</span><b>${u.supplier}</b></div>
+        <div class="idp-row"><span>Trade</span><b>${u.trade}</b></div>
+        <div class="idp-row"><span>Pricebooks affected</span><b>${u.pbs}</b></div>
+      </div>
+      <p class="rp-h">Cost trend · 12 months</p>
+      <div class="rp-card">${lineChart(series)}</div>
+      <p class="rp-h">Status</p>
+      <div class="rp-card idp-status">${statusPill}
+        ${acted?'':`<div class="a-actions" style="margin-top:12px">
+          <button class="a-btn a-approve" data-pact="approve" data-pid="${u.id}">${A.ic('check')}Approve</button>
+          <button class="a-btn a-reject" data-pact="reject" data-pid="${u.id}">${A.ic('close')}Reject</button>
+        </div>`}
+      </div>`;
+  }
+  // one delegated handler for the right panel (drill-in / back / inline approve)
+  function wirePanel(){
+    const el = document.getElementById('panel'); if(!el || el._wired) return; el._wired = true;
+    el.addEventListener('click', (e)=>{
+      const back = e.target.closest('[data-back]');
+      if(back){ A.panel(pendingTable()); return; }
+      const pact = e.target.closest('[data-pact]');
+      if(pact){ const u=byId(+pact.dataset.pid); if(!u) return;
+        u.status = pact.dataset.pact==='approve' ? 'approved':'rejected';
+        if(pact.dataset.pact==='approve') A.state.approved++;
+        reflect(); A.panel(itemDetailPanel(u)); return; }
+      const row = e.target.closest('[data-item]');
+      if(row){ const u=byId(+row.dataset.item); if(u) A.panel(itemDetailPanel(u)); }
+    });
+  }
+  function overviewPanel(){
+    const hvac=U.filter(u=>u.trade==='HVAC'&&u.status==='pending').length;
+    const elec=U.filter(u=>u.trade==='Electrical'&&u.status==='pending').length;
+    const plmb=U.filter(u=>u.trade==='Plumbing'&&u.status==='pending').length;
+    return `<p class="rp-h">This week at a glance</p>
+      <div class="rp-stats">
+        <div class="rp-stat"><div class="k">Pending updates</div><div class="v" id="ovPending">${pendingCount()}</div><div class="d warn">needs review</div></div>
+        <div class="rp-stat"><div class="k">Avg cost change</div><div class="v">+11.4%</div><div class="d up">vs last cycle</div></div>
+        <div class="rp-stat"><div class="k">Discontinuing</div><div class="v">${A.state.discontinued}</div><div class="d neutral">items flagged</div></div>
+      </div>
+      <p class="rp-h">Pending by trade</p>
+      <div class="rp-card"><div class="rp-chart-t">Cost updates awaiting review</div>
+      ${barChart([{label:'HVAC',val:hvac,color:'var(--atlas-blue)'},{label:'Electrical',val:elec,color:'#9747ff'},{label:'Plumbing',val:plmb,color:'#08bfdf'}])}</div>`;
+  }
+  function spikePanel(){
+    return `<p class="rp-h">R-410A Refrigerant 25lb · price history</p>
+      <div class="rp-card"><div class="rp-chart-t">Unit cost · last 12 months</div>
+      ${lineChart([118,120,124,126,130,134,140,150,168,182,210,245])}
+      <div style="margin-top:12px;font-size:13px;line-height:1.5;color:var(--a2-color-neutral-700)">A <b>+40%</b> jump over 12 months — the steepest in your catalog. The increase accelerated after the <b>EPA HFC phase-out</b> rules tightened supply.</div></div>
+      <p class="rp-h">Driver</p>
+      <div class="rp-card"><div style="font-size:13px;line-height:1.55;color:var(--a2-color-neutral-700)">R-410A is being phased down under the AIM Act. Distributors are drawing down inventory ahead of the <b>Jan 2025+</b> restrictions, pushing spot prices up across all 6 suppliers.</div></div>`;
+  }
+  function replacementPanel(){
+    const rep=(best,nm,sub,badge,id)=>`<div class="rep-card ${best?'best':''}">
+      <span class="rep-ic">${A.ic('box')}</span>
+      <div class="rep-txt"><div class="rep-nm">${nm}</div><div class="rep-sub">${sub}</div></div>
+      ${badge?`<span class="rep-badge">${badge}</span>`:''}
+      <button class="rep-swap" data-swap="${id}">Swap</button></div>`;
+    return `<p class="rp-h">Discontinued — replacements</p>
+      <div class="rep">
+        ${rep(true,'R-454B Refrigerant 25lb','R454B-25LB · National Refrigerants · A2L · −78% GWP','Best match','454b')}
+        ${rep(false,'R-32 Refrigerant 20lb','R32-20LB · Honeywell · A2L · −68% GWP','','r32')}
+      </div>
+      <p class="rp-h">Why R-454B</p>
+      <div class="rp-card"><div style="font-size:13px;line-height:1.55;color:var(--a2-color-neutral-700)">R-454B is the industry drop-in successor most of your installed Carrier &amp; Bryant equipment is rated for, with the closest performance curve to R-410A and the lowest GWP.</div></div>`;
+  }
+  function marginPanel(){
+    const r=(t,a,b,d)=>`<tr><td class="nm">${t}</td><td>${a}%</td><td>${b}%</td><td class="${d<0?'up':'down'}">${d>0?'+':''}${d.toFixed(1)} pts</td></tr>`;
+    return `<p class="rp-h">Projected margin impact</p>
+      <table class="rt"><thead><tr><th>Trade</th><th>Now</th><th>After</th><th>Δ</th></tr></thead><tbody>
+        ${r('HVAC',38.0,35.6,-2.4)}${r('Electrical',41.0,39.8,-1.2)}${r('Plumbing',36.0,34.1,-1.9)}
+        <tr style="border-top:2px solid var(--atlas-line)"><td class="nm">Blended</td><td class="nm">38.2%</td><td class="nm">35.8%</td><td class="up nm">-2.4 pts</td></tr>
+      </tbody></table>
+      <p class="rp-h">Recovery opportunity</p>
+      <div class="rp-card"><div style="font-size:13px;line-height:1.55;color:var(--a2-color-neutral-700)">Swapping R-410A → <b>R-454B</b> recovers ~<b>0.9 pts</b> of blended margin and avoids selling a discontinued SKU. Passing the HVAC increases through to customer-facing prices would hold margin flat.</div></div>`;
+  }
+
+  /* ---------- persistent action items as chat pills ---------- */
+  const TOPICS = [
+    { key:'spike',  pill:'Why did R-410A jump 40%?',     on:()=>flowSpike() },
+    { key:'triage', pill:'Review the cost updates',       on:()=>flowTriage() },
+    { key:'sunset', pill:'Handle the discontinued item',  on:()=>flowSunset() },
+    { key:'margin', pill:'Check the margin impact',       on:()=>flowMargin() },
+  ];
+  function agenda(){
+    const remaining = TOPICS.filter(t=>!visited[t.key]);
+    const done = TOPICS.length - remaining.length;
+    if(remaining.length===0){
+      A.atlas(`<div class="m-txt">That's all <b>4 action items</b> cleared for this week. 🎉 I'll keep watching for new supplier changes and surface the next batch when it lands.</div>`, 460)
+       .then(()=> A.chips([{ label:'Wrap up & recap', on:flowWrap }]));
+      return;
+    }
+    const intro = done===0
+      ? `<div class="m-txt">To keep this manageable, I've turned this week into <b>4 action items</b> — the chips below. I'll <b>keep surfacing whatever's left until they're all done</b>, so nothing slips through. Start wherever you like — I'd suggest the <b>R-410A spike</b> first, since it's the biggest change and explains the discontinuation.</div>`
+      : `<div class="m-txt"><b>${done} of ${TOPICS.length} done</b> — ${remaining.length} action item${remaining.length===1?'':'s'} left. What's next?</div>`;
+    A.atlas(intro, done===0?760:440).then(()=>{
+      A.chips(remaining.map(t=>({ label:t.pill, on:t.on })));
+    });
+  }
+
+  /* ---------- scenarios ---------- */
+  async function start(api){
+    A=api; money=api.money; visited={};
+    api.setTitle('Catalog updates · this week');
+    api.progress(pendingCount(), U.length);
+    api.panel(overviewPanel());
+    wirePanel();
+    await api.atlas(`<div class="m-txt">Good afternoon 👋 Here's what changed in your catalog this week.</div>`, 500);
+    await api.atlas(`<div class="m-txt"><b>12 cost updates</b> are waiting for review — most are HVAC supplier increases averaging <b>+11%</b>. Two items are also flagged for discontinuation.</div>
+      <h4>The headline</h4>
+      <ul><li><b>R-410A refrigerant</b> jumped <b>+40%</b> and is being phased out</li><li><b>7 Carrier</b> increases cluster between 9–12%</li><li>Approving everything would trim blended margin ~<b>2.4 pts</b></li></ul>
+      <div class="m-txt">Expand me (↗) for details alongside our chat — and you can click any row in the tables to drill in.</div>`, 900);
+    agenda();
+  }
+
+  async function flowSpike(){
+    visited.spike=true; A.expand(); A.panel(spikePanel());
+    const u=byId(1);
+    const acted = u.status!=='pending';
+    const tail = acted
+      ? `<div class="m-txt">You've already ${u.status==='approved'?'approved':'dismissed'} this one. ${u.status==='approved'?`The ${money(u.new)} cost is live across all 6 pricebooks.`:'It\'s left unchanged for now.'}</div>`
+      : `<div class="m-txt">This one's legitimate and affects <b>6 pricebooks</b>. Want me to approve it?</div>${actionRow(1)}`;
+    await A.atlas(`<div class="m-txt"><b>R-410A</b> climbed from ${money(u.old)} to <b>${money(u.new)}</b> — a <b>+40%</b> jump, the steepest in your catalog.</div>
+      <div class="m-txt">It's driven by the <b>EPA HFC phase-out</b>: R-410A is being restricted, so distributors are drawing down supply and prices are spiking across all 6 suppliers (chart on the right).</div>
+      ${costCard(u)}
+      ${tail}`, 850).then(node=>{
+        if(acted){ agenda(); return; }
+        bindActions(node, async (uu,act)=>{
+          if(act==='approve'){
+            A.state.approved++;
+            await A.atlas(`<div class="m-txt">Approved — the new ${money(uu.new)} cost is live across all 6 pricebooks. Heads up: because R-410A is also being <b>discontinued</b>, you may want to line up a replacement too.</div>`, 700);
+          } else {
+            await A.atlas(`<div class="m-txt">No problem — I've left R-410A unchanged and flagged it so it resurfaces next cycle.</div>`, 700);
+          }
+          if(typeof A.panel==='function') A.panel(spikePanel());
+          agenda();
+        });
+      });
+  }
+
+  let reviewedInRow = 0;
+  async function flowTriage(){
+    visited.triage=true; A.expand();
+    reviewedInRow = 0;
+    await A.atlas(`<div class="m-txt">Let's work through them. I'll go highest-impact first — most are from <b>Carrier Parts Direct</b>. I'll recommend, you decide.</div>`, 650);
+    recommendNext();
+  }
+  function firstPendingCarrier(){ return U.find(u=>u.status==='pending' && u.supplier==='Carrier Parts Direct'); }
+  function pendingCarrierCount(){ return U.filter(u=>u.status==='pending' && u.supplier==='Carrier Parts Direct').length; }
+
+  async function recommendNext(){
+    const u = firstPendingCarrier();
+    if(!u){ return wrapTriage(); }
+    A.panel(pendingTable(u.id));
+    const rec = u.pct<=12 ? `It's <b>+${u.pct.toFixed(1)}%</b>, in line with the cluster and still inside your 35% target margin — I'd <b>approve</b> it.` : `It's a steeper <b>+${u.pct.toFixed(1)}%</b> — worth a look.`;
+    await A.atlas(`<div class="m-txt">Next up — <b>${u.name}</b>. ${rec}</div>${costCard(u)}${actionRow(u.id)}`, 720).then(node=>{
+      bindActions(node, async (uu,act)=>{
+        A.panel(pendingTable());
+        if(act==='approve') reviewedInRow++; 
+        // once a clear pattern emerges, offer to batch the rest
+        if(reviewedInRow>=2 && pendingCarrierCount()>=2){ offerBatch(); }
+        else { setTimeout(recommendNext, 250); }
+      });
+    });
+  }
+
+  async function offerBatch(){
+    const n = pendingCarrierCount();
+    await A.atlas(`<div class="m-txt">You've approved <b>${reviewedInRow}</b> Carrier increases in a row — all 9–12% and within your target margin. I see a clear pattern.</div>
+      <div class="m-txt">Want me to approve the <b>remaining ${n} Carrier updates</b> together, or keep going one at a time?</div>`, 800);
+    A.chips([
+      { label:`Approve all ${n} Carrier updates`, on:()=>batchApprove() },
+      { label:'Keep reviewing one by one', on:()=>{ reviewedInRow=0; recommendNext(); } },
+    ]);
+  }
+  async function batchApprove(){
+    const list = U.filter(u=>u.status==='pending' && u.supplier==='Carrier Parts Direct');
+    const n = list.length, pbs = list.reduce((s,u)=>s+u.pbs,0);
+    list.forEach(u=> u.status='approved'); A.state.approved+=n; reflect();
+    A.panel(pendingTable());
+    await A.atlas(`<div class="m-txt">Done — approved <b>${n} Carrier updates</b> across <b>${pbs} pricebooks</b> in one go. ${A.ic('check')}</div>
+      <div class="m-txt">That leaves the Eaton and Ferguson updates. Want those too, or move on?</div>`, 850);
+    const others = U.filter(u=>u.status==='pending' && u.trade!=='HVAC');
+    A.chips([
+      { label:`Approve the last ${others.length} updates`, on:async()=>{ others.forEach(u=>u.status='approved'); A.state.approved+=others.length; reflect(); A.panel(pendingTable()); await A.atlas(`<div class="m-txt">All caught up — every pending update is resolved. Nice and clean. ✨</div>`,650); agenda(); } },
+      { label:'Move on', on:()=>{ agenda(); } },
+    ]);
+  }
+  async function wrapTriage(){
+    A.panel(pendingTable());
+    await A.atlas(`<div class="m-txt">That's the cost updates handled. Anything else?</div>`, 600);
+    agenda();
+  }
+
+  async function flowSunset(){
+    visited.sunset=true; A.expand(); A.panel(replacementPanel());
+    await A.atlas(`<div class="m-txt">Two items are being discontinued. The important one is <b>R-410A Refrigerant 25lb</b> — its supplier set a <b>sunset date of June 1, 2026</b> as part of the same EPA phase-out behind the price spike.</div>
+      <div class="m-txt">I found two drop-in replacements (right). <b>R-454B</b> is the best match — it's what most of your installed Carrier &amp; Bryant equipment is rated for, with the lowest GWP.</div>
+      <div class="m-txt">Want me to swap R-410A → R-454B across the 6 pricebooks that use it?</div>`, 900).then(node=>{
+        bindPanelSwap();
+      });
+    A.chips([
+      { label:'Swap to R-454B for me', on:()=>doSwap('454b') },
+      { label:'Not yet', on:()=>{ agenda(); } },
+    ]);
+  }
+  function bindPanelSwap(){
+    document.querySelectorAll('[data-swap]').forEach(b=> b.onclick=()=> doSwap(b.dataset.swap));
+  }
+  async function doSwap(which){
+    if(A.state.swapped) return;
+    A.state.swapped=true;
+    const nm = which==='454b' ? 'R-454B Refrigerant 25lb' : 'R-32 Refrigerant 20lb';
+    document.querySelectorAll('[data-swap]').forEach(b=>{ if(b.dataset.swap===which){ b.textContent='Swapped'; b.classList.add('done'); } b.disabled=true; });
+    await A.atlas(`<div class="m-txt">Done — I mapped <b>${nm}</b> into the <b>6 pricebooks</b> that used R-410A and carried over your markup rules. R-410A is now marked <b>do-not-order</b> so it won't be quoted on new jobs.</div>`, 800);
+    agenda();
+  }
+
+  async function flowMargin(){
+    visited.margin=true; A.expand(); A.panel(marginPanel());
+    await A.atlas(`<div class="m-txt">Here's the margin picture if you approve everything this cycle (full breakdown on the right).</div>
+      <h4>Bottom line</h4>
+      <ul><li>Blended margin dips <b>38.2% → 35.8%</b> (−2.4 pts)</li><li>HVAC takes the biggest hit at −2.4 pts</li><li>The <b>R-410A → R-454B</b> swap recovers ~<b>0.9 pts</b></li></ul>
+      <div class="m-txt">If you'd rather hold margin flat, I can draft customer-facing price increases that pass these costs through. Want me to?</div>`, 950);
+    A.chips([
+      { label:'Draft the price increases', on:async()=>{ await A.atlas(`<div class="m-txt">I've drafted pass-through price updates for the affected HVAC services — they're queued in <b>Pricing Builder</b> for your review before anything goes live.</div>`,800); agenda(); } },
+      { label:'Just keep the cost updates', on:()=>{ agenda(); } },
+    ]);
+  }
+
+  async function flowWrap(){
+    await A.atlas(`<div class="m-txt">You're all set for this week — ${A.state.approved} updates approved${A.state.swapped?', R-410A replaced':''}, and your margins are documented. I'll keep watching for new supplier changes and ping you when the next batch lands. 👋</div>`, 700);
+    A.chips([]);
+  }
+
+  /* ---------- freeform input routing ---------- */
+  function freeform(api, text){
+    A=api; money=api.money; if(!visited) visited={};
+    const t=text.toLowerCase();
+    if(/410|spike|jump|40|why/.test(t)) return flowSpike();
+    if(/review|approve|triage|cost/.test(t)) return flowTriage();
+    if(/discontinu|sunset|replace|swap|454/.test(t)) return flowSunset();
+    if(/margin|profit|impact/.test(t)) return flowMargin();
+    api.atlas(`<div class="m-txt">I can help with this week's catalog changes — summarizing what changed, explaining a specific spike, reviewing and approving cost updates, handling discontinued items, or showing margin impact. Pick one below.</div>`, 650).then(()=>agenda());
+  }
+
+  window.FLOW = { start, freeform };
+})();
+
+    })();
+
+    /* engine script */
     (function(){
 
-/* ════════════════════════════════════════════════════
-   Atlas — self-contained engine + flow
-════════════════════════════════════════════════════ */
-
-/* ── Icons ── */
+/* ============================================================
+   Atlas engine — window/fullscreen, chat, chips, right panel
+   ============================================================ */
+const HEX = `<svg class="hex-mark" viewBox="0 0 24 24" aria-hidden="true">
+  <defs><linearGradient id="atlasHex" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#2f6cdb"/><stop offset="1" stop-color="#55aae7"/></linearGradient></defs>
+  <path d="M12 0.7 L22.4 6.4 L22.4 17.6 L12 23.3 L1.6 17.6 L1.6 6.4 Z" fill="url(#atlasHex)"/>
+  <path d="M12 6.4 L13.5 10.5 L17.6 12 L13.5 13.5 L12 17.6 L10.5 13.5 L6.4 12 L10.5 10.5 Z" fill="#fff" opacity="0.92"/>
+</svg>`;
 const ICONS = {
-  chats:    '<rect x="3" y="4" width="18" height="14" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="8" y1="13" x2="15" y2="13"/>',
-  newchat:  '<path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5"/><line x1="18" y1="3" x2="18" y2="9"/><line x1="15" y1="6" x2="21" y2="6"/>',
-  expand:   '<polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/>',
-  collapse: '<polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="14" y1="10" x2="21" y2="3"/><line x1="3" y1="21" x2="10" y2="14"/>',
-  close:    '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',
-  send:     '<line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>',
-  mic:      '<rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/>',
+  search:'<circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>',
+  bell:'<path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>',
+  help:'<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>',
+  grid:'<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/>',
+  expand:'<polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/>',
+  collapse:'<polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="14" y1="10" x2="21" y2="3"/><line x1="3" y1="21" x2="10" y2="14"/>',
+  newchat:'<path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5"/><line x1="18" y1="3" x2="18" y2="9"/><line x1="15" y1="6" x2="21" y2="6"/>',
+  edit:'<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',
+  close:'<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',
+  send:'<line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>',
+  check:'<polyline points="20 6 9 17 4 12"/>',
+  up:'<line x1="12" y1="20" x2="12" y2="4"/><polyline points="5 11 12 4 19 11"/>',
+  down:'<line x1="12" y1="4" x2="12" y2="20"/><polyline points="19 13 12 20 5 13"/>',
+  swap:'<polyline points="16 3 21 3 21 8"/><line x1="21" y1="3" x2="14" y2="10"/><polyline points="8 21 3 21 3 16"/><line x1="3" y1="21" x2="10" y2="14"/>',
+  box:'<path d="M21 8 12 3 3 8v8l9 5 9-5V8z"/><polyline points="3 8 12 13 21 8"/><line x1="12" y1="13" x2="12" y2="21"/>',
+  mic:'<rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/>',
+  chats:'<rect x="3" y="4" width="18" height="14" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="8" y1="13" x2="15" y2="13"/>',
+  chevron:'<polyline points="9 18 15 12 9 6"/>',
+  chevron_left:'<polyline points="15 18 9 12 15 6"/>',
 };
-const svg = (name) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name]||''}</svg>`;
+const ic = (n, cls='') => `<svg class="ic ${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[n]||''}</svg>`;
 
-/* ── State ── */
+/* ---------------- shared state (live-linked) ---------------- */
 const STATE = {
-  open:false, mode:'window', view:'convo',
-  started:false, convoTitle:'Catalog updates · this week',
-  unread:1,
+  open: false,
+  mode: 'window',         // window | full
+  view: 'convo',          // chats | welcome | convo
+  started: false,         // has the cost-update conversation been opened
+  unread: 1,              // unread Atlas messages → drives the badge
+  pendingTotal: 12,
+  pending: 12,
+  approved: 0,
+  discontinued: 2,
+  swapped: false,
 };
 
+/* All Chats inbox — newest first. The unread one is Atlas's proactive
+   cost-update summary; the rest are prior conversations for realism. */
 const ALL_CHATS = [
-  { id:'costs',  unread:true,  title:'Catalog updates · this week', time:'Just now',
-    preview:'12 cost updates need review — HVAC increases averaging +11%, plus 2 items flagged for discontinuation.' },
-  { id:'ytd',    unread:false, title:'Year-to-date expenses',        time:'2d ago',
-    preview:'Here\'s your YTD spend across all trades, with the three biggest movers called out.' },
-  { id:'season', unread:false, title:'Spring campaign ideas',        time:'5d ago',
+  { id:'costs', unread:true,  title:'Catalog updates · this week', time:'Just now',
+    preview:'12 cost updates need review — mostly HVAC supplier increases, plus 2 items flagged for discontinuation.' },
+  { id:'ytd', unread:false, title:'Year-to-date expenses', time:'2d ago',
+    preview:'Here\'s your year-to-date spend across all trades, with the three biggest movers called out.' },
+  { id:'season', unread:false, title:'Spring campaign ideas', time:'5d ago',
     preview:'Three seasonal promotions you could run, based on last year\'s booking patterns.' },
 ];
 
-/* ── Build DOM ── */
-function buildHTML(){
-  return `
-  <div class="atw atw--full hidden" id="atw">
-    <div class="atw-head">
-      <span class="atw-title" id="atwTitle">Catalog updates · this week</span>
-      <div class="atw-hicons">
-        <button class="ic-btn" id="viewChatsBtn" title="All chats">${svg('chats')}</button>
-        <button class="ic-btn" id="newChatBtn"   title="New chat">${svg('newchat')}</button>
-        <button class="ic-btn" id="toggleSize"   title="Expand">${svg('expand')}</button>
-        <button class="ic-btn" id="closeAtw"     title="Close">${svg('close')}</button>
-      </div>
-    </div>
-    <div class="atw-body">
-      <div class="atw-left">
-        <!-- ALL CHATS -->
-        <div class="view-chats-pane" id="viewChats" style="display:none">
-          <button class="newchat-btn" id="newChatTop">${svg('newchat')} New chat</button>
-          <div class="chats-list" id="chatsList"></div>
-        </div>
-        <!-- CONVERSATION -->
-        <div style="flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden" id="viewConvo">
-          <div class="chat" id="chat"></div>
-          <div class="chips" id="chips"></div>
-          <div class="atw-foot">
-            <div class="foot-input">
-              <input id="atInput" placeholder="Ask Atlas" autocomplete="off">
-              <button class="foot-send" id="atMic">${svg('mic')}</button>
-              <button class="foot-send" id="atSend">${svg('send')}</button>
-            </div>
-            <div class="foot-disc">Atlas is TI-powered, subject to our privacy policy. Learn more</div>
-          </div>
-        </div>
-      </div>
-      <div class="atw-right" id="panel"></div>
-    </div>
-  </div>`;
-}
+/* ---------------- backdrop ---------------- */
 
-document.getElementById('atlasRoot').innerHTML = buildHTML();
-
-const $  = id => document.getElementById(id);
+/* ---------------- engine ---------------- */
+const stage = document.getElementById('atlasRoot');
+stage.innerHTML = "<div class=\"atw atw--window view-convo hidden\" id=\"atlasATW\">\n    <div class=\"atw-head\">\n      <div class=\"atw-title-wrap\"><svg class=\"hex-mark\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><defs><linearGradient id=\"atlasHexI\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"1\"><stop offset=\"0\" stop-color=\"#2f6cdb\"/><stop offset=\"1\" stop-color=\"#55aae7\"/></linearGradient></defs><path d=\"M12 0.7 L22.4 6.4 L22.4 17.6 L12 23.3 L1.6 17.6 L1.6 6.4 Z\" fill=\"url(#atlasHexI)\"/><path d=\"M12 6.4 L13.5 10.5 L17.6 12 L13.5 13.5 L12 17.6 L10.5 13.5 L6.4 12 L10.5 10.5 Z\" fill=\"#fff\" opacity=\"0.92\"/></svg><span class=\"atw-title\" id=\"atwTitle\">Atlas</span><span class=\"atw-titlebadge hidden\" id=\"atwTitleBadge\">0</span></div>\n      <div class=\"atw-hicons\">\n        <button class=\"ic-btn\" id=\"viewChatsBtn\" title=\"View all chats\"><svg class=\"ic\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect x=\"3\" y=\"4\" width=\"18\" height=\"14\" rx=\"2\"/><line x1=\"3\" y1=\"9\" x2=\"21\" y2=\"9\"/><line x1=\"8\" y1=\"13\" x2=\"15\" y2=\"13\"/></svg></button>\n        <button class=\"ic-btn\" id=\"newChat\" title=\"New conversation\"><svg class=\"ic\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5\"/><line x1=\"18\" y1=\"3\" x2=\"18\" y2=\"9\"/><line x1=\"15\" y1=\"6\" x2=\"21\" y2=\"6\"/></svg></button>\n        <button class=\"ic-btn\" id=\"toggleSize\" title=\"Expand\"><svg class=\"ic\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><polyline points=\"15 3 21 3 21 9\"/><polyline points=\"9 21 3 21 3 15\"/><line x1=\"21\" y1=\"3\" x2=\"14\" y2=\"10\"/><line x1=\"3\" y1=\"21\" x2=\"10\" y2=\"14\"/></svg></button>\n        <button class=\"ic-btn\" id=\"closeAtw\"><svg class=\"ic\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><line x1=\"18\" y1=\"6\" x2=\"6\" y2=\"18\"/><line x1=\"6\" y1=\"6\" x2=\"18\" y2=\"18\"/></svg></button>\n      </div>\n    </div>\n    <div class=\"atw-body\">\n      <div class=\"atw-left\">\n        <div class=\"view-pane\" id=\"viewChats\" style=\"display:none\"></div>\n        <div class=\"view-pane\" id=\"viewWelcome\" style=\"display:none\"></div>\n        <div class=\"view-pane\" id=\"viewConvo\" style=\"display:flex;flex-direction:column;flex:1 1 auto;min-height:0\"><div class=\"chat\" id=\"chat\"></div><div class=\"chips\" id=\"chips\"></div></div>\n        <div class=\"atw-foot\">\n          <div class=\"foot-input\"><input id=\"atInput\" placeholder=\"Ask Atlas\" autocomplete=\"off\"><button class=\"foot-send\" id=\"atMic\"><svg class=\"ic\" style=\"width:18px;height:18px\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"9\" y=\"2\" width=\"6\" height=\"12\" rx=\"3\"/><path d=\"M5 10a7 7 0 0 0 14 0\"/><line x1=\"12\" y1=\"19\" x2=\"12\" y2=\"22\"/></svg></button><button class=\"foot-send\" id=\"atSend\"><svg class=\"ic\" style=\"width:18px;height:18px\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><line x1=\"22\" y1=\"2\" x2=\"11\" y2=\"13\"/><polygon points=\"22 2 15 22 11 13 2 9 22 2\"/></svg></button></div>\n          <div class=\"foot-disc\">Atlas is TI-powered, subject to our privacy policy. Learn more</div>\n        </div>\n      </div>\n      <div class=\"atw-resizer\" id=\"atwResizer\"></div>\n      <div class=\"atw-right\" id=\"panel\"></div>\n    </div>\n  </div>";
+const $ = (id)=> document.getElementById(id);
 const chat = $('chat'), chipsEl = $('chips'), panelEl = $('panel');
 
-/* ── Right panel: stats + chart ── */
-function statsPanel(){
-  const maxH = 120;
-  const bars = [
-    {label:'HVAC',       val:8, h:maxH,            cls:'bar-blue'},
-    {label:'Electrical', val:2, h:Math.round(2/8*maxH), cls:'bar-purple'},
-    {label:'Plumbing',   val:2, h:Math.round(2/8*maxH), cls:'bar-teal'},
-  ];
-  return `
-  <div class="panel-section-label">This week at a glance</div>
-  <div class="stat-cards">
-    <div class="stat-card">
-      <div class="stat-card-label">Pending updates</div>
-      <div class="stat-card-val">12</div>
-      <div class="stat-card-sub sub-orange">needs review</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-card-label">Avg cost change</div>
-      <div class="stat-card-val">+11.4%</div>
-      <div class="stat-card-sub sub-red">vs last cycle</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-card-label">Discontinuing</div>
-      <div class="stat-card-val">2</div>
-      <div class="stat-card-sub sub-muted">items flagged</div>
-    </div>
-  </div>
-  <div class="panel-section-label">Pending by trade</div>
-  <div class="chart-wrap">
-    <div class="chart-title">Cost updates awaiting review</div>
-    <div class="bar-chart">
-      ${bars.map(b=>`
-      <div class="bar-col">
-        <span class="bar-val">${b.val}</span>
-        <div class="bar ${b.cls}" style="height:${b.h}px"></div>
-        <span class="bar-label">${b.label}</span>
-      </div>`).join('')}
-    </div>
-  </div>`;
+/* badge — "displays the number of unread messages in Atlas; shown whenever
+   an unread message exists" (Atlas Framework v1.2, Entry Points → Badge) */
+function unreadCount(){ return ALL_CHATS.filter(c=>c.unread).length; }
+function updateBadge(){
+  const n = unreadCount();
+  const hb = $('hexBadge'), tb = $('atwTitleBadge');
+  hb.textContent = n; hb.classList.toggle('hidden', n===0);
+  tb.textContent = n; tb.classList.toggle('hidden', n===0 || STATE.view!=='chats');
 }
 
-/* ── Atlas message helper ── */
-function atlasMsg(html, delay=650){
-  return new Promise(resolve=>{
-    const wrap = document.createElement('div');
-    wrap.className='m-atlas-wrap';
-    wrap.innerHTML=`<div class="m-label">Atlas</div><div class="m-typing"><i></i><i></i><i></i></div>`;
-    chat.appendChild(wrap); scrollChat();
-    setTimeout(()=>{
-      wrap.innerHTML=`<div class="m-label">Atlas</div><div class="m-body">${html}</div>`;
-      scrollChat(); resolve(wrap);
-    }, delay);
-  });
+function openAtlas(view='chats'){
+  STATE.open = true;
+  $('atlasATW').classList.remove('hidden');
+  showView(view);
 }
-function userMsg(text){
-  const d=document.createElement('div'); d.className='m-user'; d.textContent=text;
-  chat.appendChild(d); scrollChat();
-}
-function setChips(list){
-  chipsEl.innerHTML='';
-  (list||[]).forEach(c=>{
-    const b=document.createElement('button'); b.className='chip'; b.textContent=c.label;
-    b.onclick=()=>{ chipsEl.innerHTML=''; userMsg(c.label); c.on&&c.on(); };
-    chipsEl.appendChild(b);
-  });
-  scrollChat();
-}
-function scrollChat(){ requestAnimationFrame(()=>{ chat.scrollTop=chat.scrollHeight; }); }
-
-/* ── Open / close / mode ── */
-function openAtlas(view){
-  STATE.open=true;
-  $('atw').classList.remove('hidden');
-  if(view) showView(view);
-}
-function closeAtlas(){
-  STATE.open=false; $('atw').classList.add('hidden');
-  try{ parent.postMessage({type:'atlas-close'},'*'); }catch(e){}
-}
-function toggleAtlas(){ STATE.open ? closeAtlas() : openAtlas('convo'); }
+function closeAtlas(){ STATE.open=false; $('atlasATW').classList.add('hidden'); }
+function toggleAtlas(){ STATE.open ? closeAtlas() : openAtlas('chats'); }
 
 function setMode(m){
-  STATE.mode=m;
-  const w=$('atw');
-  w.classList.toggle('atw--full',   m==='full');
+  STATE.mode = m;
+  const w = $('atlasATW');
+  w.classList.toggle('atw--full', m==='full');
   w.classList.toggle('atw--window', m==='window');
-  $('toggleSize').innerHTML = svg(m==='full'?'collapse':'expand');
+  $('toggleSize').innerHTML = ic(m==='full'?'collapse':'expand');
   $('toggleSize').title = m==='full'?'Restore':'Expand';
+  scrollChat();
 }
 
+/* view router */
 function showView(v){
-  STATE.view=v;
-  $('viewChats').style.display = v==='chats' ? 'flex' : 'none';
-  $('viewConvo').style.display  = v==='convo' ? 'flex' : 'none';
-  const titles={chats:'All chats', convo: STATE.convoTitle||'Atlas'};
-  $('atwTitle').textContent = titles[v]||'Atlas';
-  $('viewChatsBtn').style.display = v==='chats' ? 'none' : 'inline-flex';
+  STATE.view = v;
+  const w = $('atlasATW');
+  w.classList.remove('view-chats','view-welcome','view-convo');
+  w.classList.add('view-'+v);
+  $('viewChats').style.display    = v==='chats'   ? 'flex' : 'none';
+  $('viewWelcome').style.display  = v==='welcome' ? 'flex' : 'none';
+  $('viewConvo').style.display    = v==='convo'   ? 'flex' : 'none';
+  // header title + back-to-list affordance
+  const titles = { chats:'All chats', welcome:'Atlas', convo: STATE.convoTitle || 'Atlas' };
+  $('atwTitle').textContent = titles[v];
+  $('viewChatsBtn').style.display = (v==='chats') ? 'none' : 'inline-flex';
   if(v==='chats') renderChats();
+  if(v==='welcome') renderWelcome();
+  updateBadge();
   if(v==='convo') scrollChat();
 }
 
-/* ── All Chats ── */
+function scrollChat(){ requestAnimationFrame(()=>{ chat.scrollTop = chat.scrollHeight; }); }
+
+/* All Chats list */
 function renderChats(){
-  $('chatsList').innerHTML=ALL_CHATS.map(c=>`
+  const list = $('chatsList');
+  list.innerHTML = ALL_CHATS.map(c=>`
     <button class="chat-card ${c.unread?'unread':''}" data-chat="${c.id}">
       <div class="cgc-top">
         <span class="cgc-title">${c.title}</span>
-        <span class="cgc-meta"><span class="cgc-time">${c.time}</span>${c.unread?'<span class="cgc-dot"></span>':''}</span>
+        <span class="cgc-meta"><span class="cgc-time">${c.time}</span>${c.unread?'<span class="cgc-dot" aria-label="Unread"></span>':''}</span>
       </div>
       <div class="cgc-prev">${c.preview}</div>
     </button>`).join('');
-  $('chatsList').querySelectorAll('[data-chat]').forEach(b=>b.onclick=()=>openChat(b.dataset.chat));
+  list.querySelectorAll('[data-chat]').forEach(b=> b.onclick = ()=> openChat(b.dataset.chat));
 }
-
 function openChat(id){
   if(id==='costs'){ startConvo(); return; }
-  const c=ALL_CHATS.find(x=>x.id===id); if(c) c.unread=false;
-  STATE.convoTitle=c?c.title:'Atlas';
+  const c = ALL_CHATS.find(x=>x.id===id); if(c) c.unread=false;
+  STATE.convoTitle = c ? c.title : 'Atlas';
+  // stub conversation for the non-demo saved chats
   chat.innerHTML=''; chipsEl.innerHTML=''; panelEl.innerHTML='';
-  STATE.started=false; showView('convo');
-  atlasMsg(`<p>${c?c.preview:''}</p><p style="color:#8b8b8b">This is a saved conversation — this prototype focuses on the catalog updates chat.</p>`, 360);
+  api.progress(null);
+  STATE.started=false;
+  showView('convo');
+  api.atlas(`<div class="m-txt">${c?c.preview:''}</div><div class="m-txt" style="color:var(--a2-color-neutral-500)">This is a saved conversation — this prototype focuses on the catalog updates chat.</div>`, 360);
+  updateBadge();
 }
 
-function newChat(){ STATE.started=false; chat.innerHTML=''; chipsEl.innerHTML=''; panelEl.innerHTML=''; STATE.convoTitle='New chat'; showView('convo'); }
-
-/* ── Start conversation ── */
+/* start (or resume) the cost-update conversation */
 function startConvo(){
-  const costs=ALL_CHATS.find(c=>c.id==='costs'); if(costs) costs.unread=false;
-  STATE.convoTitle='Catalog updates · this week';
+  const costs = ALL_CHATS.find(c=>c.id==='costs'); if(costs) costs.unread=false;
+  STATE.convoTitle = 'Catalog updates · this week';
   if(!STATE.started){
     chat.innerHTML=''; chipsEl.innerHTML=''; panelEl.innerHTML='';
-    STATE.started=true;
-    FLOW.start();
+    FLOW.start(api);
+    STATE.started = true;
   }
   showView('convo');
 }
 
-/* ════════════════════════════════════════════════════
-   FLOW — conversation script
-════════════════════════════════════════════════════ */
-const FLOW = (()=>{
-  let _resolved = [];
+/* New Chat → welcome empty state */
+function newChat(){
+  STATE.started = false;
+  chat.innerHTML=''; chipsEl.innerHTML=''; panelEl.innerHTML='';
+  api.progress(null);
+  STATE.convoTitle = 'Atlas';
+  showView('welcome');
+}
+function renderWelcome(){
+  const sugg = [
+    { label:'Summarize this week\u2019s cost updates', on:startConvo },
+    { label:'Why did R-410A jump 40%?', on:()=>{ startConvo(); } },
+    { label:'What\u2019s being discontinued?', on:()=>{ startConvo(); } },
+  ];
+  const el = $('welcomeSugg'); el.innerHTML='';
+  sugg.forEach(s=>{ const b=document.createElement('button'); b.className='welcome-chip'; b.innerHTML=`<span>${s.label}</span>${ic('send')}`; b.onclick=s.on; el.appendChild(b); });
+}
 
-  async function start(){
-    panelEl.innerHTML = statsPanel();
-
-    await atlasMsg(`<p>Good afternoon 👋 Here's what changed in your catalog this week.</p>`, 700);
-    await atlasMsg(`<p><strong>12 cost updates</strong> are waiting for review — most are HVAC supplier increases averaging <strong>+11%</strong>. Two items are also flagged for discontinuation.</p>
-      <p><strong>The headline</strong></p>
-      <ul>
-        <li><strong>R-410A refrigerant</strong> jumped <strong>+40%</strong> and is being phased out</li>
-        <li><strong>7 Carrier</strong> increases cluster between 9–12%</li>
-        <li>Approving everything would trim blended margin <strong>~2.4 pts</strong></li>
-      </ul>
-      <p>Expand me (↗) for details alongside our chat — and you can click any row in the tables to drill in.</p>`, 900);
-    await atlasMsg(`<p>To keep this manageable, I've turned this week into <strong>4 action items</strong> — the chips below. I'll <strong>keep surfacing whatever's left until they're all done</strong>, so nothing slips through. Start wherever you like — I'd suggest the <strong>R-410A spike</strong> first, since it's the biggest change and explains the discontinuation.</p>`, 900);
-
-    setChips([
-      { label:'Why did R-410A jump 40%?',      on: ()=>flowR410A() },
-      { label:'Review the cost updates',        on: ()=>flowCostUpdates() },
-      { label:'Handle the discontinued item',   on: ()=>flowDisco() },
-      { label:'Check the margin impact',        on: ()=>flowMargin() },
-    ]);
-  }
-
-  async function flowR410A(){
-    await atlasMsg(`<p><strong>R-410A refrigerant jumped +40%</strong> because the EPA is phasing it out under the AIM Act. Manufacturers have been winding down production ahead of the 2025 ban, causing a global supply crunch — prices rose 30–45% industry-wide in Q1.</p>
-      <p>This also explains the discontinuation: <strong>R-22 Refrigerant 30lb</strong> is no longer being stocked by your supplier. You'll want to swap it to R-410A 25lb or flag jobs that referenced it.</p>`, 800);
-    setChips([
-      { label:'Swap R-22 to R-410A now',     on: ()=>flowSwap() },
-      { label:'Review the cost updates',     on: ()=>flowCostUpdates() },
-      { label:'Check the margin impact',     on: ()=>flowMargin() },
-    ]);
-  }
-
-  async function flowCostUpdates(){
-    await atlasMsg(`<p>Here are the 4 biggest increases — they account for most of the cost impact. Approve or reject each:</p>`, 600);
-
-    const updates = [
-      { sku:'HVAC-REFR-002', name:'R-410A Refrigerant 25lb',  supplier:'National Refrigerants', old:'$175.00', nw:'$245.00', pct:'+40.0%' },
-      { sku:'HVAC-COMP-001', name:'Scroll Compressor 3-Ton',  supplier:'Carrier Parts Direct',  old:'$1,245.00', nw:'$1,389.50', pct:'+11.6%' },
-      { sku:'HVAC-HP-021',   name:'Heat Pump 3-Ton 18 SEER',  supplier:'Carrier Parts Direct',  old:'$2,840.00', nw:'$3,120.00', pct:'+9.9%' },
-      { sku:'ELEC-PNL-005',  name:'200A Main Breaker Panel',  supplier:'Eaton Wholesale',       old:'$389.00', nw:'$425.00', pct:'+9.3%' },
-    ];
-
-    const tableWrap = document.createElement('div');
-    tableWrap.className='m-atlas-wrap';
-    tableWrap.innerHTML=`<div class="m-label">Atlas</div><div class="m-body" id="costTableBody"></div>`;
-    chat.appendChild(tableWrap); scrollChat();
-
-    const body = tableWrap.querySelector('#costTableBody');
-    body.style.cssText='display:flex;flex-direction:column;gap:8px;';
-
-    updates.forEach((u,i)=>{
-      const row = document.createElement('div');
-      row.id=`crow_${i}`;
-      row.style.cssText='border:1px solid #e8e8e8;border-radius:8px;padding:12px 14px;';
-      row.innerHTML=`
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px">
-          <div>
-            <div style="font-weight:600;font-size:14px">${u.name}</div>
-            <div style="font-size:12px;color:#8b8b8b;margin-top:2px">${u.sku} · ${u.supplier}</div>
-          </div>
-          <span style="font-weight:700;color:#d62100;font-size:13px;flex-shrink:0;margin-left:12px">${u.pct}</span>
-        </div>
-        <div style="font-size:13px;color:#545454;margin-bottom:10px">${u.old} → <strong style="color:#1a1a1a">${u.nw}</strong></div>
-        <div style="display:flex;gap:8px" id="cactions_${i}">
-          <button onclick="FLOW.approve(${i})" style="flex:1;height:28px;border-radius:6px;border:none;background:#0265dc;color:#fff;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer">Approve</button>
-          <button onclick="FLOW.askWhy(${i},'${u.name}')" style="flex:1;height:28px;border-radius:6px;border:1px solid #dfdfdf;background:#fff;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer">Why?</button>
-          <button onclick="FLOW.reject(${i})" style="flex:1;height:28px;border-radius:6px;border:1px solid #d62100;background:#fff;color:#d62100;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer">Reject</button>
-        </div>`;
-      body.appendChild(row);
+/* api given to the flow script */
+const api = {
+  ic, HEX, state: STATE,
+  money(n){ return '$'+Number(n).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}); },
+  setTitle(t){ STATE.convoTitle = t; if(STATE.view==='convo') $('atwTitle').textContent = t; },
+  expand(){ if(STATE.mode!=='full') setMode('full'); },
+  user(text){
+    const d = document.createElement('div'); d.className='m-user'; d.textContent = text;
+    chat.appendChild(d); scrollChat();
+  },
+  // append an Atlas message after a typing pause; resolves with the message element
+  atlas(html, delay=620){
+    return new Promise(resolve=>{
+      const t = document.createElement('div'); t.className='m-atlas';
+      t.innerHTML = `<div class="atlas-label">${HEX}<span>Atlas</span></div><div class="m-typing"><i></i><i></i><i></i></div>`;
+      chat.appendChild(t); scrollChat();
+      setTimeout(()=>{
+        t.innerHTML = `<div class="atlas-label">${HEX}<span>Atlas</span></div>${html}`;
+        scrollChat(); resolve(t);
+      }, delay);
+    });
+  },
+  chips(list){
+    chipsEl.innerHTML = '';
+    (list||[]).forEach(c=>{
+      const b = document.createElement('button'); b.className='chip'; b.textContent = c.label;
+      b.onclick = ()=>{ chipsEl.innerHTML=''; api.user(c.label); c.on && c.on(); };
+      chipsEl.appendChild(b);
     });
     scrollChat();
+  },
+  panel(html){ panelEl.innerHTML = html; },
+  panelHint(){ /* nudge the user to expand for detail */ },
+  // persistent review tracker (top of chat)
+  progress(left, total){
+    const bar = $('atwProgress'); if(!bar) return;
+    if(total==null){ bar.classList.add('hidden'); return; }
+    bar.classList.remove('hidden');
+    const done = total - left;
+    $('apgTxt').innerHTML = left===0
+      ? `<b>All ${total}</b> cost updates reviewed`
+      : `<b>${left}</b> of ${total} cost updates left to review`;
+    $('apgDone').textContent = `${done} done`;
+    $('apgFill').style.width = (total ? (done/total*100) : 0) + '%';
+    bar.classList.toggle('apg-complete', left===0);
+  },
+};
+
+/* wire backdrop + window controls */
+updateBadge();
+$('closeAtw').onclick = closeAtlas;
+$('toggleSize').onclick = ()=> setMode(STATE.mode==='full'?'window':'full');
+$('viewChatsBtn').onclick = ()=> showView('chats');
+$('newChat').onclick = newChat;
+$('newChatTop').onclick = newChat;
+function freeText(){
+  const v = $('atInput').value.trim(); if(!v) return;
+  $('atInput').value='';
+  startConvo();
+  api.user(v);
+  FLOW.freeform(api, v);
+}
+$('atSend').onclick = freeText;
+$('atInput').addEventListener('keydown', e=>{ if(e.key==='Enter') freeText(); });
+
+/* ---- draggable split: resize chat / detail panes in full-screen convo ---- */
+(function(){
+  const atw = $('atlasATW'), resizer = $('atwResizer');
+  const body = atw.querySelector('.atw-body');
+  const MIN_LEFT = 360, MIN_RIGHT = 440;
+  let dragging = false;
+  try { const s = localStorage.getItem('atlasSplitW'); if(s) atw.style.setProperty('--atw-left-w', parseInt(s,10)+'px'); } catch(e){}
+  function onMove(e){
+    if(!dragging) return;
+    const r = body.getBoundingClientRect();
+    const w = Math.max(MIN_LEFT, Math.min(e.clientX - r.left, r.width - MIN_RIGHT));
+    atw.style.setProperty('--atw-left-w', w+'px');
   }
-
-  async function flowDisco(){
-    await atlasMsg(`<p><strong>2 items</strong> have been discontinued by suppliers and need action:</p>`, 500);
-    const wrap=document.createElement('div'); wrap.className='m-atlas-wrap';
-    wrap.innerHTML=`<div class="m-label">Atlas</div><div class="m-body"><div id="discoCard" style="border:1px solid #e8e8e8;border-radius:8px;padding:12px 14px;">
-      <div style="display:flex;justify-content:space-between;margin-bottom:4px">
-        <div>
-          <div style="font-weight:600">R-22 Refrigerant 30lb</div>
-          <div style="font-size:12px;color:#8b8b8b;margin-top:2px">HVAC-REFR-001 · National Refrigerants</div>
-        </div>
-        <span style="font-size:12px;font-weight:700;color:#d62100">Discontinued</span>
-      </div>
-      <div style="font-size:13px;color:#545454;margin-bottom:10px">No longer available. Suggested: <strong>R-410A 25lb</strong></div>
-      <div style="display:flex;gap:8px">
-        <button onclick="FLOW.swapFromCard()" style="flex:1;height:28px;border-radius:6px;border:none;background:#0265dc;color:#fff;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer">Swap to R-410A</button>
-        <button onclick="FLOW.removeFromCard()" style="flex:1;height:28px;border-radius:6px;border:1px solid #dfdfdf;background:#fff;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer">Remove</button>
-      </div>
-    </div></div>`;
-    chat.appendChild(wrap); scrollChat();
-    setChips([{ label:'Now review cost updates', on:()=>{ userMsg('Now review cost updates'); flowCostUpdates(); } }]);
+  function onUp(){
+    if(!dragging) return;
+    dragging = false;
+    resizer.classList.remove('dragging');
+    document.body.style.userSelect = ''; document.body.style.cursor = '';
+    window.removeEventListener('pointermove', onMove);
+    window.removeEventListener('pointerup', onUp);
+    try { localStorage.setItem('atlasSplitW', parseInt(atw.style.getPropertyValue('--atw-left-w'),10)); } catch(e){}
   }
-
-  async function flowMargin(){
-    await atlasMsg(`<p>If you approve all 12 cost updates, your blended margin drops by approximately <strong>2.4 points</strong> — from 42.1% to 39.7%.</p>
-      <p>To offset this, you could:</p>
-      <ul>
-        <li>Raise retail prices on HVAC services by 4–5%</li>
-        <li>Reject the R-410A increase and source from alternate supplier</li>
-        <li>Apply selective approval — accept the smaller increases only</li>
-      </ul>`, 800);
-    setChips([
-      { label:'Review the cost updates', on:()=>{ userMsg('Review the cost updates'); flowCostUpdates(); } },
-      { label:'Handle the discontinued item', on:()=>{ userMsg('Handle the discontinued item'); flowDisco(); } },
-    ]);
-  }
-
-  async function flowSwap(){
-    await atlasMsg(`<p>Done — <strong>R-22 Refrigerant 30lb</strong> has been swapped to <strong>R-410A 25lb</strong> in your pricebook. All jobs referencing R-22 will now use the updated item.</p>`, 600);
-    setChips([{ label:'Review the cost updates', on:()=>{ userMsg('Review the cost updates'); flowCostUpdates(); } }]);
-  }
-
-  return {
-    start,
-
-    approve(i){
-      const row=document.getElementById(`crow_${i}`); if(!row) return;
-      row.querySelector(`#cactions_${i}`).innerHTML=`<span style="font-size:12px;font-weight:600;color:#077e50">✓ Approved</span>`;
-      row.style.opacity='.6';
-    },
-    reject(i){
-      const row=document.getElementById(`crow_${i}`); if(!row) return;
-      row.querySelector(`#cactions_${i}`).innerHTML=`<span style="font-size:12px;font-weight:600;color:#d62100">✗ Rejected</span>`;
-      row.style.opacity='.6';
-    },
-    async askWhy(i,name){
-      userMsg(`Why did ${name} increase?`);
-      const reasons=['EPA phase-out driving global supply crunch — R-410A prices up 30–45% industry-wide.','Carrier revised OEM pricing after aluminum input costs rose 8% in February.','SEER2 regulation changeover — Carrier restructured heat pump pricing for new units.','Eaton raised distributor pricing 8–10% across the panel line due to steel and copper costs.'];
-      await atlasMsg(`<p>${reasons[i]||'Supplier pricing revision due to input cost increases.'}</p>`, 600);
-    },
-    async swapFromCard(){
-      const card=document.getElementById('discoCard'); if(card) card.style.opacity='.5';
-      await atlasMsg(`<p>Done — <strong>R-22</strong> swapped to <strong>R-410A 25lb</strong>. Jobs referencing R-22 now use the updated item.</p>`, 500);
-      setChips([{ label:'Review the cost updates', on:()=>{ userMsg('Review the cost updates'); flowCostUpdates(); } }]);
-    },
-    async removeFromCard(){
-      const card=document.getElementById('discoCard'); if(card) card.style.opacity='.5';
-      await atlasMsg(`<p>Removed from your pricebook. You can re-add it from the catalog if needed.</p>`, 400);
-    },
-
-    async freeform(text){
-      const t=text.toLowerCase();
-      if(t.includes('r-410a')||t.includes('refrigerant')||t.includes('410')){ await flowR410A(); }
-      else if(t.includes('discontinu')||t.includes('r-22')){ await flowDisco(); }
-      else if(t.includes('margin')||t.includes('impact')){ await flowMargin(); }
-      else if(t.includes('cost')||t.includes('update')||t.includes('review')){ await flowCostUpdates(); }
-      else {
-        await atlasMsg(`<p>I can help with that. Try asking about the R-410A increase, discontinued items, margin impact, or tap a chip to get started.</p>`, 600);
-        setChips([
-          { label:'Why did R-410A jump 40%?',    on:()=>{ userMsg('Why did R-410A jump 40%?'); flowR410A(); } },
-          { label:'Review the cost updates',     on:()=>{ userMsg('Review the cost updates'); flowCostUpdates(); } },
-        ]);
-      }
-    },
-  };
+  resizer.addEventListener('pointerdown', e=>{
+    if(!(STATE.mode==='full' && STATE.view==='convo')) return;
+    e.preventDefault();
+    dragging = true;
+    resizer.classList.add('dragging');
+    document.body.style.userSelect = 'none'; document.body.style.cursor = 'col-resize';
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerup', onUp);
+  });
+  resizer.addEventListener('dblclick', ()=>{
+    atw.style.removeProperty('--atw-left-w');
+    try { localStorage.removeItem('atlasSplitW'); } catch(e){}
+  });
 })();
 
-/* ── Wire controls ── */
-$('viewChatsBtn').onclick = ()=>showView('chats');
-$('newChatBtn').onclick   = newChat;
-$('newChatTop').onclick   = newChat;
-$('closeAtw').onclick     = closeAtlas;
-$('toggleSize').onclick   = ()=>setMode(STATE.mode==='full'?'window':'full');
-
-function freeText(){
-  const v=$('atInput').value.trim(); if(!v) return;
-  $('atInput').value='';
-  if(!STATE.started) startConvo();
-  else showView('convo');
-  userMsg(v);
-  FLOW.freeform(v);
-}
-$('atSend').onclick=freeText;
-$('atInput').addEventListener('keydown',e=>{ if(e.key==='Enter') freeText(); });
-
-/* ── Embed mode: open immediately ── */
-const EMBED=false;
-if(EMBED){
-  document.body.classList.add('atlas-embed');
-  document.documentElement.classList.add('atlas-embed');
-  setMode('window');
-  openAtlas('convo');
-  startConvo();
-}
-
-/* ── Exports for inline use ── */
-window.__atlasOpen        = openAtlas;
-window.__atlasClose       = closeAtlas;
-window.__atlasStartConvo  = startConvo;
+/* ---- exports ---- */
+window.__atlasOpen = function(v){ openAtlas(v||'convo'); startConvo(); };
+window.__atlasClose = closeAtlas;
+window.__atlasStartConvo = startConvo;
 
     })();
   }
@@ -4544,7 +4795,6 @@ window.__atlasStartConvo  = startConvo;
     _init();
     requestAnimationFrame(()=>{
       if(window.__atlasOpen) window.__atlasOpen('convo');
-      if(window.__atlasStartConvo) window.__atlasStartConvo();
     });
   };
 })();
