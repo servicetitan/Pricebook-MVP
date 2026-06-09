@@ -4663,8 +4663,8 @@ function unreadCount(){ return ALL_CHATS.filter(c=>c.unread).length; }
 function updateBadge(){
   const n = unreadCount();
   const hb = $('hexBadge'), tb = $('atwTitleBadge');
-  hb.textContent = n; hb.classList.toggle('hidden', n===0);
-  tb.textContent = n; tb.classList.toggle('hidden', n===0 || STATE.view!=='chats');
+  if(hb){ hb.textContent = n; hb.classList.toggle('hidden', n===0); }
+  if(tb){ tb.textContent = n; tb.classList.toggle('hidden', n===0 || STATE.view!=='chats'); }
 }
 
 function openAtlas(view='chats'){
