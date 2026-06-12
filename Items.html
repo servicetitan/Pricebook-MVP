@@ -3925,7 +3925,6 @@ function itemDrawerHTML(it, sup){
       <div class="dw-sec-lbl">SUPPLIER COMPARISON <span class="dw-pill">${d.suppliers.length}</span></div>
       ${(()=>{
         const sups = d.suppliers;
-        const maxLead = Math.max(...sups.filter(s=>s.leadDays).map(s=>s.leadDays));
         const inStock = sups.filter(s=>s.avail==='In stock');
         return `
         <div class="dw-sup-summary">
@@ -3937,14 +3936,11 @@ function itemDrawerHTML(it, sup){
             <th>Supplier</th>
             <th>Part #</th>
             <th>Availability</th>
-            <th>Lead time</th>
             <th class="dw-sup-act-h"></th>
           </tr></thead>
           <tbody>${sups.map((s,i)=>{
             const availCls = s.avail==='In stock'?'ok':s.avail==='Low stock'?'low':'order';
             const availIc = s.avail==='In stock'?'check_circle':s.avail==='Low stock'?'warning':'local_shipping';
-            const leadPct = s.leadDays ? Math.round((s.leadDays/maxLead)*100) : 50;
-            const leadCls = s.leadDays<=2?'fast':s.leadDays>=6?'slow':'';
             return `<tr data-sup-launch="${i}" data-sup-name="${s.name}" style="cursor:pointer">
               <td>
                 <div class="dw-sup-name-wrap">
@@ -3953,12 +3949,6 @@ function itemDrawerHTML(it, sup){
               </td>
               <td><span class="dw-sup-mono">${s.part}</span></td>
               <td><span class="dw-sup-avail ${availCls}">${ic(availIc)}${s.avail}</span></td>
-              <td>
-                <div class="dw-sup-lead-bar">
-                  <div class="dw-sup-lead-track"><div class="dw-sup-lead-fill ${leadCls}" style="width:${leadPct}%"></div></div>
-                  <span class="dw-sup-lead-txt">${s.lead}</span>
-                </div>
-              </td>
               <td class="dw-sup-act"><button class="dw-sup-launch" data-sup-launch="${i}" data-sup-name="${s.name}" aria-label="View ${s.name} detail" title="View ${s.name} supplier detail">${ic('chevron_right')}</button></td>
             </tr>`;
           }).join('')}</tbody>
