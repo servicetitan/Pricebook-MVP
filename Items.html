@@ -1549,6 +1549,8 @@ table.dt { width: 100%; border-collapse: collapse; table-layout: fixed; }
 .dw-sup-name { font-size: var(--a2-font-size-300); font-weight: var(--a2-font-weight-semibold); color: var(--a2-foreground-color-default); }
 .dw-sup-best-badge { display: inline-flex; align-items: center; gap: 3px; font-size: 11px; font-weight: 700; background: var(--a2-color-green-600); color: #fff; border-radius: 999px; padding: 2px 7px; letter-spacing: .02em; white-space: nowrap; }
 .dw-sup-best-badge .ic { font-size: 13px; }
+.dw-sup-default-badge { display: inline-flex; align-items: center; gap: 3px; font-size: 11px; font-weight: 700; background: var(--a2-color-blue-50); color: var(--a2-color-blue-700); border: 1px solid var(--a2-color-blue-200); border-radius: 999px; padding: 2px 8px; letter-spacing: .02em; white-space: nowrap; }
+.dw-sup-default-badge .ic { font-size: 13px; }
 .dw-sup-mono { font-family: var(--a2-font-family-mono, ui-monospace, monospace); font-size: 12px; color: var(--a2-foreground-color-subdued); }
 .dw-sup-cost { font-size: 14px; font-weight: 700; color: var(--a2-foreground-color-default); text-align: right; white-space: nowrap; }
 .dw-sup-cost-low { color: var(--a2-color-green-700); }
@@ -3785,7 +3787,7 @@ const DRAWER_OVERRIDES = {
     supplierSku: 'SRS-4421-WW',
     priceUpdated: 'June 1, 2026',
     suppliers: [
-      { name:'SRS Distribution', part:'SRS-4421-WW',  avail:'In stock',      lead:'2 days', leadDays:2, cost:89.50 },
+      { name:'SRS Distribution', part:'SRS-4421-WW',  avail:'In stock',      lead:'2 days', leadDays:2, cost:89.50, default:true },
       { name:'ABC Supply',       part:'ABC-88231-WW', avail:'In stock',      lead:'2 days', leadDays:2, cost:91.00 },
       { name:'QXO',              part:'QXO-WW30-LM',  avail:'Low stock',     lead:'4 days', leadDays:4, cost:87.25 },
       { name:'HD Supply',        part:'HDS-LM30-WW',  avail:'Special order', lead:'7 days', leadDays:7, cost:94.80 },
@@ -3819,7 +3821,7 @@ const DRAWER_OVERRIDES = {
     priceUpdated: 'June 1, 2026',
     contract: { supplier:'SRS Distribution', agreement:'2026 Roofing Supply Agreement', term:'Locked through Dec 31, 2026', off:'23% below list' },
     suppliers: [
-      { name:'SRS Distribution', part:'SRS-7720-WG',  avail:'In stock',      lead:'2 days', leadDays:2, cost:94.50 },
+      { name:'SRS Distribution', part:'SRS-7720-WG',  avail:'In stock',      lead:'2 days', leadDays:2, cost:94.50, default:true },
       { name:'ABC Supply',       part:'ABC-5512-WG',  avail:'In stock',      lead:'2 days', leadDays:2, cost:96.80 },
       { name:'QXO',              part:'QXO-WG200-36', avail:'Low stock',     lead:'4 days', leadDays:4, cost:91.20 },
       { name:'HD Supply',        part:'HDS-WG36-200', avail:'Special order', lead:'7 days', leadDays:7, cost:99.50 },
@@ -3945,6 +3947,7 @@ function itemDrawerHTML(it, sup){
               <td>
                 <div class="dw-sup-name-wrap">
                   <span class="dw-sup-name">${s.name}</span>
+                  ${s.default?`<span class="dw-sup-default-badge">${ic('star')} Default</span>`:''}
                 </div>
               </td>
               <td><span class="dw-sup-mono">${s.part}</span></td>
