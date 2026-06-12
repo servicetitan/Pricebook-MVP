@@ -2080,17 +2080,9 @@ window.__resources['res_assets_trades_garage_doors_svg'] = 'data:image/svg+xml;b
 <div class="atoast-wrap" id="atoastWrap"></div>
 
 <script>
-// Land on the Services page only when the shared link is opened cold
-// (no hash AND not navigated here from within the app). When arriving from
-// the Services sidebar — either via the #catalogs hash or just an in-app
-// click whose referrer is Services.html — stay on Items and show Catalogs.
-// The referrer check is a safety net so a stale cached Services.html (which
-// may link to bare Items.html) still reaches Catalogs instead of bouncing.
-(function(){
-  var fromApp = document.referrer && (document.referrer.indexOf('Services.html') !== -1
-    || document.referrer.indexOf('Items.html') !== -1);
-  if(!location.hash && !fromApp){ location.replace('Services.html'); }
-})();
+// Entry point is Services.html, so Items.html no longer redirects.
+// The active tab is chosen from the URL hash (#catalogs / #updates / etc.),
+// defaulting to Catalogs when there's no hash.
 /* ============================================================
    Shared app shell — ServiceTitan PriceBook
    Provides: ICONS, TI_ICON, ic(), RAIL, SIDE, NAV_HREF,
