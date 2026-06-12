@@ -2107,7 +2107,7 @@ const SIDE = [
 // side-nav links that route to a real page
 const NAV_HREF = {
   'Services': 'Services.html',
-  'Catalogs': 'Items.html',
+  'Catalogs': 'Items.html#catalogs',
   'Updates': 'Pricebook Updates.html',
 };
 
@@ -2356,6 +2356,8 @@ function render(){
   document.getElementById('pageContent').innerHTML = pageHTML();
   wire();
 }
+// Mark that the user has landed, so Items.html won't redirect back here
+try { sessionStorage.setItem('pb_landed','1'); } catch(e){}
 render();
 
 </script>
