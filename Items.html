@@ -2195,6 +2195,7 @@ const SIDE = [
 const NAV_HREF = {
   'Services': 'Services.html',
   'Catalogs': 'Items.html',
+  'History': 'Items.html#audit',
   'Updates': 'Items.html#updates',
 };
 
@@ -3494,6 +3495,15 @@ function pageHTML(){
     <div class="drawer-scrim" id="drawerScrim"></div>
     <aside class="drawer" id="itemDrawer" aria-hidden="true"></aside>`;
   }
+  if(activeTab==='audit'){
+    return `
+    <div class="page-head">
+      <h1 class="page-title">History</h1>
+    </div>
+    <div id="tabPanel">${tabPanelHTML()}</div>
+    <div class="drawer-scrim" id="drawerScrim"></div>
+    <aside class="drawer" id="itemDrawer" aria-hidden="true"></aside>`;
+  }
   return `
     <div class="page-head">
       <h1 class="page-title">Catalogs</h1>
@@ -3501,8 +3511,6 @@ function pageHTML(){
     <div class="page-tabs" id="pageTabs">
       ${pageTab('catalogs','Universal Catalog')}
       ${pageTab('suppliers','Supplier Catalogs')}
-      ${pageTab('updates','Updates &amp; Alerts', (window.UpdatesTab && UpdatesTab.count) ? UpdatesTab.count() : '')}
-      ${pageTab('audit','Audit Trail')}
     </div>
     <div id="tabPanel">${tabPanelHTML()}</div>
     <div class="drawer-scrim" id="drawerScrim"></div>
@@ -4477,12 +4485,14 @@ function catalogToast(msg){
 }
 
 function render(){
-  const activeNav = (activeTab==='updates') ? 'Updates' : 'Catalogs';
+  const activeNav = (activeTab==='updates') ? 'Updates' : (activeTab==='audit') ? 'History' : 'Catalogs';
   mountShell(activeNav);
   const cat = document.querySelector('[data-nav="Catalogs"]');
   if(cat) cat.onclick = (e)=>{ e.preventDefault(); switchTab('catalogs'); };
   const upd = document.querySelector('[data-nav="Updates"]');
   if(upd) upd.onclick = (e)=>{ e.preventDefault(); switchTab('updates'); };
+  const hist = document.querySelector('[data-nav="History"]');
+  if(hist) hist.onclick = (e)=>{ e.preventDefault(); switchTab('audit'); };
   document.getElementById('pageContent').innerHTML = pageHTML();
   wire();
 }
