@@ -1798,17 +1798,27 @@ table.dt { width: 100%; border-collapse: collapse; table-layout: fixed; }
 .page-tab.active .pt-badge { background: var(--a2-color-blue-50); border-color: var(--a2-color-blue-100); color: var(--a2-foreground-color-primary); }
 
 /* ---------- Updates: category filter buttons + type chips ---------- */
-.upd-filterbar { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
-.ask-atlas-btn { margin-left: auto; display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 14px 0 11px; border: 1px solid var(--a2-border-color-default); border-radius: var(--a2-radius-2); background: var(--a2-background-color-default); color: var(--a2-foreground-color-default); font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer; transition: background var(--a2-duration-default) var(--a2-transition-ease), border-color var(--a2-duration-default) var(--a2-transition-ease); }
+.page-sub { font-size: 14px; line-height: 1.5; color: var(--a2-color-neutral-600); margin: 0 0 18px; max-width: 760px; }
+.page-title .ic { font-size: 24px; color: var(--a2-color-neutral-500); vertical-align: middle; }
+.upd-filterbar { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; border-bottom: 1px solid var(--a2-border-color-subdued); }
+/* underline sub-tabs */
+.upd-tabs { display: flex; align-items: stretch; gap: 4px; }
+.upd-tab { position: relative; display: inline-flex; align-items: center; gap: 8px; height: 42px; padding: 0 4px; margin: 0 8px; border: none; background: transparent; font-family: inherit; font-size: 14px; font-weight: 600; color: var(--a2-color-neutral-600); cursor: pointer; }
+.upd-tab:first-child { margin-left: 0; }
+.upd-tab:hover { color: var(--a2-color-neutral-950); }
+.upd-tab.on { color: var(--a2-foreground-color-primary); font-weight: 700; }
+.upd-tab.on::after { content: ''; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; background: var(--a2-foreground-color-primary); border-radius: 2px 2px 0 0; }
+.upd-tab-count { min-width: 20px; height: 18px; padding: 0 6px; border-radius: 9px; background: var(--a2-color-neutral-50); border: 1px solid var(--a2-color-neutral-100); color: var(--a2-color-neutral-600); font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; }
+.upd-tab.on .upd-tab-count { background: var(--a2-color-blue-50); border-color: var(--a2-color-blue-100); color: var(--a2-foreground-color-primary); }
+/* right-side controls */
+.upd-controls { margin-left: auto; display: inline-flex; align-items: center; gap: 8px; padding-bottom: 6px; }
+.upd-provider-lbl { font-size: 13px; color: var(--a2-color-neutral-600); }
+.upd-provider, .upd-auto-btn { display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 12px; border: 1px solid var(--a2-border-color-default); border-radius: var(--a2-radius-2); background: var(--a2-background-color-default); color: var(--a2-foreground-color-default); font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer; transition: background var(--a2-duration-default) var(--a2-transition-ease); white-space: nowrap; }
+.upd-provider .ic, .upd-auto-btn .ic { font-size: 18px; color: var(--a2-color-neutral-500); }
+.upd-provider:hover, .upd-auto-btn:hover { background: var(--a2-background-color-secondary); }
+.ask-atlas-btn { display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 14px 0 11px; border: 1px solid var(--a2-border-color-default); border-radius: var(--a2-radius-2); background: var(--a2-background-color-default); color: var(--a2-foreground-color-default); font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer; transition: background var(--a2-duration-default) var(--a2-transition-ease), border-color var(--a2-duration-default) var(--a2-transition-ease); }
 .ask-atlas-btn:hover { background: var(--a2-background-color-secondary); }
 .aab-hex { width: 18px; height: 18px; display: block; flex: none; }
-.upd-cat .seg-btn { display: inline-flex; align-items: center; gap: 8px; }
-.upd-fcount {
-  min-width: 20px; height: 18px; padding: 0 6px; border-radius: 9px;
-  background: var(--a2-color-neutral-0); border: 1px solid var(--a2-color-neutral-100); color: var(--a2-color-neutral-600);
-  font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center;
-}
-.seg-btn.on .upd-fcount { background: var(--a2-color-blue-50); border-color: var(--a2-color-blue-100); color: var(--a2-foreground-color-primary); }
 .upd-type {
   display: inline-flex; align-items: center; height: 22px; padding: 0 10px; border-radius: 999px;
   font-size: 12px; font-weight: 700; white-space: nowrap; border: 1px solid transparent;
@@ -2384,8 +2394,7 @@ function toast(msg, kind){
       <td><a class="item-link">${r.name}</a><div class="item-sub">${r.sku+' · '+r.category}</div></td>
       <td>${typeChip(r)}</td>
       <td class="muted">${r.supplier}</td>
-      <td class="nw">${costCell}</td>
-      <td class="nw">${pctCell}</td>
+      <td class="nw">${costCell}<br>${pctCell}</td>
       <td class="muted nw">${r.effective}</td>
       <td><span class="chip ${r.status}">${r.status==='pending'?'':'<span class="dot"></span>'}${STATUS_LABEL[r.status]}</span></td>
       <td>${action}</td>
@@ -2396,6 +2405,26 @@ function toast(msg, kind){
     const pc = pctChange(r.oldPrice, r.newPrice), up = pc>=0;
     const costCell = `<span class="cost-old">${fmt(r.oldPrice)}</span>&nbsp;<span class="cost-new">${fmt(r.newPrice)}</span>`;
     const pctCell = `<span class="pct ${up?'up':'down'}">${ic(up?'arrow_upward':'arrow_downward')}${(up?'+':'')+pc.toFixed(1)}%</span>`;
+    // In the combined "All updates" view, render item rows with the SAME
+    // columns as cost rows (Item | Type | Supplier | Cost | Effective | Status)
+    // so everything lines up under one header.
+    if(cat!=='item'){
+      const statusCell = r.status==='swapped'
+        ? `<span class="chip swapped">${ic('check')} Swapped</span>`
+        : `<span class="chip ${r.status}">${r.status==='pending'?'':'<span class="dot"></span>'}${STATUS_LABEL[r.status]}</span>`;
+      const act = r.status==='pending'
+        ? `<div class="row-actions" style="gap:4px"><button class="swap-btn" data-iswap="${r.id}">${ic('sync')} Swap</button><button class="act-btn reject" data-reject="${r.id}" aria-label="Dismiss">${ic('close')}</button><span class="row-chevron">${ic('chevron_right')}</span></div>`
+        : `<div class="row-actions" style="gap:4px"><button class="act-btn view" data-iview="${r.id}" aria-label="View details">${ic('open_in_new')}</button><span class="row-chevron">${ic('chevron_right')}</span></div>`;
+      return `<tr data-row="${r.id}" data-irow="${r.id}" style="cursor:pointer">
+        <td><a class="item-link" data-iview="${r.id}">${r.name}</a><div class="item-sub">${r.sku}</div></td>
+        <td>${typeChip(r)}</td>
+        <td class="muted">${r.supplier}</td>
+        <td class="nw">${costCell}<br>${pctCell}</td>
+        <td class="muted nw">${r.effective}</td>
+        <td>${statusCell}</td>
+        <td>${act}</td>
+      </tr>`;
+    }
     const replCell = `<div><div class="repl-name">${r.replName}</div><div class="repl-sku">${r.replSku}</div></div>`;
     let action;
     if(r.status==='pending'){
@@ -2451,16 +2480,21 @@ function toast(msg, kind){
       cost: COST.length,
       item: UPD.length,
     };
-    const fbtn = (id,label)=>`<button class="seg-btn ${cat===id?'on':''}" data-cat="${id}">${label}<span class="upd-fcount">${counts[id]}</span></button>`;
+    const fbtn = (id,label)=>`<button class="upd-tab ${cat===id?'on':''}" data-cat="${id}">${label}<span class="upd-tab-count">${counts[id]}</span></button>`;
     return `
     <div class="upd-filterbar">
-      <div class="seg-toggle upd-cat">
+      <div class="upd-tabs">
         ${fbtn('all','All updates')}${fbtn('cost','Cost updates')}${fbtn('item','Item updates')}
       </div>
-      <button class="ask-atlas-btn" id="askAtlasBtn" aria-label="Explain with Atlas">
-        <svg class="aab-hex" viewBox="0 0 24 24" aria-hidden="true"><defs><linearGradient id="aabHex" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2f6cdb"/><stop offset="1" stop-color="#55aae7"/></linearGradient></defs><path d="M12 0.7 L22.4 6.4 L22.4 17.6 L12 23.3 L1.6 17.6 L1.6 6.4 Z" fill="url(#aabHex)"/><path d="M12 6.4 L13.5 10.5 L17.6 12 L13.5 13.5 L12 17.6 L10.5 13.5 L6.4 12 L10.5 10.5 Z" fill="#fff" opacity="0.92"/></svg>
-        Explain with Atlas
-      </button>
+      <div class="upd-controls">
+        <span class="upd-provider-lbl">Provider</span>
+        <button class="upd-provider" type="button">ServiceTitan Universal Catalog ${ic('keyboard_arrow_down')}</button>
+        <button class="upd-auto-btn" type="button">${ic('settings')} Auto</button>
+        <button class="ask-atlas-btn" id="askAtlasBtn" aria-label="Explain with Atlas">
+          <svg class="aab-hex" viewBox="0 0 24 24" aria-hidden="true"><defs><linearGradient id="aabHex" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2f6cdb"/><stop offset="1" stop-color="#55aae7"/></linearGradient></defs><path d="M12 0.7 L22.4 6.4 L22.4 17.6 L12 23.3 L1.6 17.6 L1.6 6.4 Z" fill="url(#aabHex)"/><path d="M12 6.4 L13.5 10.5 L17.6 12 L13.5 13.5 L12 17.6 L10.5 13.5 L6.4 12 L10.5 10.5 Z" fill="#fff" opacity="0.92"/></svg>
+          Explain with Atlas
+        </button>
+      </div>
     </div>
     <div class="toolbar">
       <div class="status-filter">
@@ -2488,20 +2522,19 @@ function toast(msg, kind){
           <th></th>
         </tr></thead>` : `
         <colgroup>
-          <col style="width:25%"><col style="width:10%"><col style="width:15%"><col style="width:13%"><col style="width:10%">
-          <col style="width:12%"><col style="width:12%"><col style="width:3%">
+          <col style="width:26%"><col style="width:12%"><col style="width:18%"><col style="width:15%">
+          <col style="width:13%"><col style="width:13%"><col style="width:3%">
         </colgroup>
         <thead><tr>
           ${sortTh('Item','item')}
           <th>Type</th>
           <th>Supplier</th>
-          <th>Cost change</th>
-          ${sortTh('% change','pct')}
+          ${sortTh('Cost change','pct')}
           ${sortTh('Effective','effective')}
           <th>Status</th>
           <th></th>
         </tr></thead>`}
-        <tbody id="updBody">${slice.length ? slice.map(rowHTML).join('') : `<tr><td colspan="${cat==='item'?7:8}" class="dt-empty">No updates match this filter.</td></tr>`}</tbody>
+        <tbody id="updBody">${slice.length ? slice.map(rowHTML).join('') : `<tr><td colspan="${cat==='item'?8:7}" class="dt-empty">No updates match this filter.</td></tr>`}</tbody>
       </table>
       <div class="pagination">
         <div class="pager">
@@ -3453,6 +3486,16 @@ function pageTab(id, label, badge){
 }
 
 function pageHTML(){
+  if(activeTab==='updates'){
+    return `
+    <div class="page-head">
+      <h1 class="page-title">Updates ${ic('keyboard_arrow_down')}</h1>
+    </div>
+    <p class="page-sub">Review the latest cost updates, supersessions, and sunsets from the ServiceTitan Universal Catalog, then approve or dismiss each change.</p>
+    <div id="tabPanel">${tabPanelHTML()}</div>
+    <div class="drawer-scrim" id="drawerScrim"></div>
+    <aside class="drawer" id="itemDrawer" aria-hidden="true"></aside>`;
+  }
   return `
     <div class="page-head">
       <h1 class="page-title">Catalogs</h1>
